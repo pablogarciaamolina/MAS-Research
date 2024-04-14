@@ -14,7 +14,9 @@ from src.utils import set_seed, load_model
 DATA_PATH: Final[str] = "data"
 
 # set device
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+device = (
+    torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+)
 set_seed(42)
 
 
