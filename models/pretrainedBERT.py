@@ -6,7 +6,7 @@
 
 # Path: models/pretrainedBERT.py
 import torch.nn as nn
-from transformers import BertModel, BertTokenizer
+from transformers import BertModel, BertTokenizer, BertForSequenceClassification
 
 class PretrainedBERT(nn.Module):
     """
@@ -26,6 +26,7 @@ class PretrainedBERT(nn.Module):
         """
         
         self.bert = BertModel.from_pretrained('bert-base-uncased')
+        # self.bert = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels = 4, output_attentions = True, output_hidden_states = False)
         self.classifier = nn.Linear(hidden_size, num_classes)
         
     def forward(self, input_ids, attention_mask):
@@ -47,3 +48,5 @@ class PretrainedBERT(nn.Module):
         """
         nn.init.xavier_uniform_(self.classifier.weight)
         nn.init.constant_(self.classifier.bias, 0)
+        
+
