@@ -4,6 +4,8 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 import os
 
+from transformers import BertTokenizer
+
 # Audio processing
 from scipy import signal
 from scipy.io import wavfile
@@ -60,6 +62,7 @@ class IEMOCAP_Dataset(Dataset):
 
         self.files = os.listdir(self.audio_dir)
         self.files = [file.split(".")[0] for file in self.files]
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-cased') 
 
     def __len__(self):
         return len(self.files)
@@ -71,6 +74,16 @@ class IEMOCAP_Dataset(Dataset):
         text_file = os.path.join(self.text_dir, file + ".txt")
         with open(text_file, "r") as f:
             text = f.read()
+        
+        encoding = self.tokenizer.encode_plus(
+                text,
+                add_special_tokens=True,
+                max_length=128,
+                truncation=True,
+                return_token_type_ids=False,
+                pad_to_max_length=True,
+                return_attention_mask=True,
+                return_tensors='pt')
 
         # Audio
         audio_file = os.path.join(self.audio_dir, file + ".wav")
@@ -86,7 +99,7 @@ class IEMOCAP_Dataset(Dataset):
             emotion = f.read()
         emotion = int(emotion)
 
-        return audio, text, torch.tensor(emotion)
+        return audio, torch.tensor(encoding), torch.tensor(emotion)
 
 
 if __name__ == "__main__":

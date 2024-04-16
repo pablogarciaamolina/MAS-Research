@@ -31,7 +31,7 @@ class PretrainedBERT(nn.Module):
             1. BERT model.
             2. Classifier layer.
         """
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        # self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         #self.bert = BertModel.from_pretrained('bert-base-uncased')
         self.bert = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels = num_labels, output_attentions = True, output_hidden_states = False)
         #self.dropout = nn.Dropout(0.1)
@@ -48,8 +48,8 @@ class PretrainedBERT(nn.Module):
         outputs = self.bert(input_ids, attention_mask)
         pooled_output = outputs[1]  
         #pooled_output = self.dropout(pooled_output)
-        logits = self.classifier(pooled_output)
-        return logits
+        # logits = self.classifier(pooled_output)
+        return pooled_output
 
     def init_weights(self):
         """
