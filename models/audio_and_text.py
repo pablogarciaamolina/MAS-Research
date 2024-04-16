@@ -76,7 +76,7 @@ class Audio_Text_MSA_Model(torch.Module):
 
     def forward(self,
             audio_inputs: torch.Tensor, 
-            text_inputs #???
+            text_inputs: torch.Tensor,
         ) -> torch.Tensor:
         """
         Forward method of the model
@@ -95,8 +95,10 @@ class Audio_Text_MSA_Model(torch.Module):
         # out_audio = self.audio_linear(out_alexnet)
 
         # TEXT ONLY
-        out_text = ...
+        out_text = self.bert(text_inputs)
 
         # AUDIO AND TEXT
         fusioned_features: torch.Tensor = torch.concat([out_audio, out_text], dim=...) # ?
-        outputs = self.clasificator(outputs)
+        outputs = self.clasificator(fusioned_features)
+
+        return outputs
