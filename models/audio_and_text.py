@@ -77,13 +77,15 @@ class Audio_Text_MSA_Model(torch.Module):
     def forward(self,
             audio_inputs: torch.Tensor, 
             text_inputs: torch.Tensor,
+            attention_mask: torch.Tensor
         ) -> torch.Tensor:
         """
         Forward method of the model
 
         Args:
             audio_inputs: audio spectrogram representation of the audio data. [batch, f, t, c]
-            text_inputs: text representation of the data ...
+            text_inputs: text data representation of the text data. [batch, seq_len]
+            attention_mask: attention mask for the text data. [batch, seq_len]
 
         Return:
             The logits vector (in tensor form) with size the number of classes.
@@ -95,7 +97,7 @@ class Audio_Text_MSA_Model(torch.Module):
         # out_audio = self.audio_linear(out_alexnet)
 
         # TEXT ONLY
-        out_text = self.bert(text_inputs)
+        out_text = self.bert(text_inputs, attention_mask)
 
         # AUDIO AND TEXT
         fusioned_features: torch.Tensor = torch.concat([out_audio, out_text], dim=...) # ?
