@@ -20,7 +20,9 @@ from src.utils import (
 DATA_PATH: Final[str] = "data"
 
 # set device and seed
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+device = (
+    torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+)
 set_seed(42)
 
 
