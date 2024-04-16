@@ -1,13 +1,14 @@
 import torch
 import pandas as pd
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 import os
 
 # Audio processing
 from scipy import signal
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
+
 
 def log_specgram(audio, sample_rate, window_size=40,
                  step_size=20, eps=1e-10):
@@ -57,21 +58,22 @@ class IEMOCAP_Dataset(Dataset):
         self.text_dir = os.path.join(data_path, "Text")
         self.emotion_dir = os.path.join(data_path, "Emotion/Utterances")
 
-        self.audio_files = os.listdir(self.audio_dir)
-        self.text_files = os.listdir(self.text_dir)
-        self.emotion_files = os.listdir(self.emotion_dir)
+        self.files = os.listdir(self.audio_dir)
+        self.files = [file.split(".")[0] for file in self.files]
 
     def __len__(self):
-        return len(self.audio_files)
+        return len(self.files)
 
     def __getitem__(self, idx):
+        file = self.files[idx]
+
         # Text
-        text_file = os.path.join(self.text_dir, self.text_files[idx])
+        text_file = os.path.join(self.text_dir, file + ".txt")
         with open(text_file, "r") as f:
             text = f.read()
 
         # Audio
-        audio_file = os.path.join(self.audio_dir, self.audio_files[idx])
+        audio_file = os.path.join(self.audio_dir, file + ".wav")
         spectrogram = audio2spectrogram(audio_file)
         spectrogram = get_3d_spec(spectrogram)
         # Transpose to match PyTorch's format
@@ -79,15 +81,22 @@ class IEMOCAP_Dataset(Dataset):
         audio: torch.Tensor = torch.tensor(npimg)
 
         # Emotion
-        emotion_file = os.path.join(self.emotion_dir, self.emotion_files[idx])
+        emotion_file = os.path.join(self.emotion_dir, file + ".txt")
         with open(emotion_file, "r") as f:
             emotion = f.read()
         emotion = int(emotion)
 
-        return audio, text, emotion
+        return audio, text, torch.tensor(emotion)
 
 
 if __name__ == "__main__":
     path = "data/"
     dataset = IEMOCAP_Dataset(path)
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+
+    # Split the dataset
+    train_size = int(0.8 * len(dataset))
+    test_size = len(dataset) - train_size
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+
+    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
