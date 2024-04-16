@@ -84,6 +84,10 @@ class IEMOCAP_Dataset(Dataset):
                 pad_to_max_length=True,
                 return_attention_mask=True,
                 return_tensors='pt')
+        
+        input_ids = encoding['input_ids'].squeeze(0)
+        attention_mask = encoding['attention_mask'].squeeze(0)
+        
 
         # Audio
         audio_file = os.path.join(self.audio_dir, file + ".wav")
@@ -99,7 +103,7 @@ class IEMOCAP_Dataset(Dataset):
             emotion = f.read()
         emotion = int(emotion)
 
-        return audio, torch.tensor(encoding), torch.tensor(emotion)
+        return audio, input_ids, attention_mask, torch.tensor(emotion)
 
 
 if __name__ == "__main__":
