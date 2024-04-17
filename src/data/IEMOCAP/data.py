@@ -8,6 +8,12 @@ from transformers import BertTokenizer
 from scipy import signal
 from scipy.io import wavfile
 
+
+DATA_PATH = "data/IEMOCAP"
+TEST_SIZE = 0.2
+VAL_SIZE = 0.2
+
+
 class IEMOCAP_Dataset(Dataset):
     '''Customized dataset for the IEMOCAP dataset.
     It will contain audio, text, and emotion labels.
@@ -81,6 +87,7 @@ class IEMOCAP_Dataset(Dataset):
         emotion = int(emotion)
 
         return audio, input_ids, attention_mask, torch.tensor(emotion)
+
 
 def log_specgram(audio: np.array, sample_rate: int, window_size: int = 20,
                  step_size: int = 10, eps: float = 1e-10):
@@ -186,17 +193,51 @@ def get_3d_spec(Sxx_in, moments=None):
     return np.concatenate(stacked, axis=2)
 
 
+def load_data(batch_size: int = 1, shuffle: bool = False,
+              num_workers: int = 0) ->\
+        tuple[DataLoader, DataLoader, DataLoader]:
+    '''Loads the data from the IEMOCAP dataset, creating
+    the training, validation, and testing dataloaders.
 
-if __name__ == "__main__":
-    path = "data/"
+    Parameters
+    ----------
+    batch_size : int
+        The batch size for the DataLoader
+    shuffle : bool
+        Whether to shuffle the training data
+    num_workers : int
+        The number of workers for the DataLoader
+
+    Returns
+    -------
+    train_loader : DataLoader
+        The training dataloader
+    val_loader : DataLoader
+        The validation dataloader
+    test_loader : DataLoader
+        The testing dataloader
+    '''
     # Create the dataset
-    dataset = IEMOCAP_Dataset(path)
+    dataset = IEMOCAP_Dataset(DATA_PATH)
 
     # Split the dataset into training and testing
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
-    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    test_size = int(TEST_SIZE * len(dataset))
+    train_dataset, test_dataset = random_split(dataset,
+                                               [len(dataset) - test_size,
+                                                test_size])
+
+    # Divide the training dataset into training and validation
+    train_size = int(0.8 * len(train_dataset))
+    val_size = len(train_dataset) - train_size
+    train_dataset, val_dataset = random_split(train_dataset,
+                                              [train_size, val_size])
 
     # Create the dataloaders
-    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size,
+                              shuffle=shuffle, num_workers=num_workers)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size,
+                            shuffle=False, num_workers=num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size,
+                             shuffle=False, num_workers=num_workers)
+
+    return train_loader, val_loader, test_loader

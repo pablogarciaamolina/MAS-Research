@@ -3,6 +3,7 @@ import shutil
 
 DATA_PATH = "data/IEMOCAP"
 
+
 def emotion_management_1():
     '''Initially, the emotions are stored both in txt and anvil files. This
     function filters only the text files. Additionally, given that the
