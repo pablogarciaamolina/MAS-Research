@@ -17,7 +17,7 @@ from src.utils import (
     parameters_to_double,
 )
 from models import Audio_Text_MSA_Model
-from src.train_functions import train_step, val_step
+from .train_functions import train_step, val_step
 
 # static variables
 DATA_PATH: Final[str] = "data"

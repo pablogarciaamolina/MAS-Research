@@ -7,7 +7,6 @@ from torch.jit import RecursiveScriptModule
 from typing import Final
 
 # own modules
-from src.data import load_data
 from src.utils import set_seed, load_model
 
 # static variables
@@ -28,7 +27,7 @@ def main(name: str) -> float:
     # TODO
     # load data
     test_data: DataLoader
-    _, _, test_data, mean, std = load_data(DATA_PATH, batch_size=64)
+    _, _, test_data, mean, std = ...
 
     # define model
     model: RecursiveScriptModule = load_model(f"{name}").to(device)

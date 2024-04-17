@@ -1,6 +1,7 @@
 import os
 import shutil
 
+DATA_PATH = "data/IEMOCAP"
 
 def emotion_management_1():
     '''Initially, the emotions are stored both in txt and anvil files. This
@@ -9,9 +10,9 @@ def emotion_management_1():
     we only store the first rating.
     '''
     # The directory containing the emotions' files
-    emot_dir = "data/Not_Sorted_Emotion/Emotion"
+    emot_dir = f"{DATA_PATH}_PATH/Not_Sorted_Emotion/Emotion"
     # The directory where the individual .txt files will be stored
-    destination_dir = "data/Emotion"
+    destination_dir = f"{DATA_PATH}/Emotion"
 
     # Create destination directory
     if not os.path.exists(destination_dir):
@@ -49,13 +50,13 @@ def emotion_management_2():
     i = 0
     emotion_dict = {}
 
-    list_dir = os.listdir("data/Emotion")
+    list_dir = os.listdir(f"{DATA_PATH}/Emotion")
 
-    if not os.path.exists("data/Emotion/Utterances"):
-        os.makedirs("data/Emotion/Utterances")
+    if not os.path.exists(f"{DATA_PATH}/Emotion/Utterances"):
+        os.makedirs(f"{DATA_PATH}/Emotion/Utterances")
 
     for file in list_dir:
-        with open(os.path.join("data/Emotion", file), "r") as f:
+        with open(os.path.join(f"{DATA_PATH}/Emotion", file), "r") as f:
             # The file is full of utterances
             for line in f.readlines():
                 # Extract the parts of the utterance
@@ -76,7 +77,7 @@ def emotion_management_2():
                     emotion = emotion_dict[emotion]
 
                 # Store the utterance and emotion
-                out_file = os.path.join("data/Emotion/Utterances",
+                out_file = os.path.join(f"{DATA_PATH}/Emotion/Utterances",
                                         utterance + ".txt")
                 with open(out_file, "w") as out:
                     out.write(str(emotion))
@@ -89,8 +90,8 @@ def audio_management():
     has its own folder. This function moves all the audio files to a
     single directory
     '''
-    audio_dir = "data/Not_Sorted_Audio"
-    destination_dir = "data/Audio"
+    audio_dir = f"{DATA_PATH}/Not_Sorted_Audio"
+    destination_dir = f"{DATA_PATH}/Audio"
 
     list_audios = os.listdir(audio_dir)
 
@@ -121,8 +122,8 @@ def text_management():
     utterance.
     '''
     # Paths for the source and destination of the files
-    text_dir = "data/Not_Sorted_Text"
-    destination_dir = "data/Text"
+    text_dir = f"{DATA_PATH}/Not_Sorted_Text"
+    destination_dir = f"{DATA_PATH}/Text"
 
     # Take all text documents
     list_texts = os.listdir(text_dir)
@@ -146,8 +147,8 @@ def text_management():
 
                 # Some problems arose given that some utterance isn't correctly
                 # formatted (in the format <utterance> <time> <dialog>)
-                if out_file == "data/Text\M.txt" or out_file == \
-                        "data/Text\F.txt":
+                if out_file == f"{DATA_PATH}/Text\M.txt" or out_file == \
+                        f"{DATA_PATH}/Text\F.txt":
                     continue
 
                 # Write the phrase
@@ -157,17 +158,17 @@ def text_management():
 
 if __name__ == "__main__":
     # Delete the old directories
-    if os.path.exists("data/Emotion/Utterances"):
-        shutil.rmtree("data/Emotion/Utterances")
-    if os.path.exists("data/Text"):
-        shutil.rmtree("data/Text")
-    if os.path.exists("data/Audio"):
-        shutil.rmtree("data/Audio")
+    if os.path.exists(f"{DATA_PATH}/Emotion/Utterances"):
+        shutil.rmtree(f"{DATA_PATH}/Emotion/Utterances")
+    if os.path.exists(f"{DATA_PATH}/Text"):
+        shutil.rmtree(f"{DATA_PATH}/Text")
+    if os.path.exists(f"{DATA_PATH}/Audio"):
+        shutil.rmtree(f"{DATA_PATH}/Audio")
 
     # Filter emotion texts and store the categories' dictionary
     emotion_management_1()
     emotions = emotion_management_2()
-    with open("data/emotions.txt", "w") as f:
+    with open(f"{DATA_PATH}/emotions.txt", "w") as f:
         for emotion, value in emotions.items():
             f.write(f"{emotion}: {value}\n")
 
