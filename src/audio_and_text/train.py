@@ -55,7 +55,7 @@ def main() -> None:
     print("Loading data...")
     train_data: DataLoader
     val_data: DataLoader
-    train_data, val_data, _, mean, std = ...
+    train_data, val_data, _, = ...
     print("DONE")
 
     # ------------PRE-TRAINING-----------
