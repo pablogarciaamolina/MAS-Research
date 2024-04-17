@@ -110,7 +110,7 @@ class AlexNet_Based_FCN(torch.nn.Module):
             Teh number of neighbouring channels to use in the LRN.
         """
 
-        assert mode.lower() in LRN_MODES
+        assert mode.lower() in list(map(lambda x: x.value, LRN_MODES))
 
         if mode == LRN_MODES.FULL:
             return in_channels

@@ -44,6 +44,7 @@ def main() -> None:
     C: int = 256
     lrn_mode: str = "full"
     lambd: float = 0.3
+    time_dim: int = 1500
 
     # Scheduler
     weight_decay = ...
@@ -57,7 +58,7 @@ def main() -> None:
     print("Loading data...")
     train_data: DataLoader
     val_data: DataLoader
-    train_data, val_data, _, = load_data(batch_size=batch_size)
+    train_data, val_data, _, = load_data(batch_size=batch_size, time_dim=time_dim)
     print("DONE")
 
     # ------------PRE-TRAINING-----------

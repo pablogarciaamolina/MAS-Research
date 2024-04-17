@@ -3,6 +3,7 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 import os
 from transformers import BertTokenizer
+import torch.nn.functional as F
 
 # Audio processing
 from scipy import signal
@@ -27,9 +28,14 @@ class IEMOCAP_Dataset(Dataset):
         The path to the data folder (as such, the data,
         with the audio, text, and emotion files, should
         already be stored there).
+    audio_time : int
+        The length of the audio files (in periods of sampling) to
+        consider. Default is 1520, which corresponds to 1520, which
+        is the max length of the audio files in our dataset.
     '''
 
-    def __init__(self, data_path: str):
+    def __init__(self, data_path: str, audio_time: int = 1520):
+        self.audio_time = audio_time
         # Paths to the folders
         self.audio_dir = os.path.join(data_path, "Audio")
         self.text_dir = os.path.join(data_path, "Text")
@@ -61,7 +67,7 @@ class IEMOCAP_Dataset(Dataset):
                 max_length=128,
                 truncation=True,
                 return_token_type_ids=False,
-                pad_to_max_length=True,
+                padding='max_length',
                 return_attention_mask=True,
                 return_tensors='pt')
 
@@ -74,10 +80,15 @@ class IEMOCAP_Dataset(Dataset):
         # Transform the audio file to a spectrogram
         spectrogram = audio2spectrogram(audio_file)
         spectrogram = get_3d_spec(spectrogram)
-        # Transpose to match PyTorch's format
-        npimg = np.transpose(spectrogram, (2, 0, 1))
+        # Transpose to match PyTorch's format (F, T, C)
+        npimg = np.transpose(spectrogram, (1, 0, 2))
         # Convert to tensor
         audio: torch.Tensor = torch.tensor(npimg)
+        # Pad to maximum length
+        if audio.size(1) < self.audio_time:
+            pad_amount = self.audio_time - audio.size(1)
+            # Fill with zeros along the time axis
+            audio = F.pad(audio, (0, 0, 0, pad_amount), "constant", 0)
 
         # Emotion
         emotion_file = os.path.join(self.emotion_dir, file + ".txt")
@@ -193,7 +204,7 @@ def get_3d_spec(Sxx_in, moments=None):
     return np.concatenate(stacked, axis=2)
 
 
-def load_data(batch_size: int = 1, shuffle: bool = False,
+def load_data(time_dim: int = 1500, batch_size: int = 1, shuffle: bool = False,
               num_workers: int = 0) ->\
         tuple[DataLoader, DataLoader, DataLoader]:
     
@@ -202,6 +213,8 @@ def load_data(batch_size: int = 1, shuffle: bool = False,
 
     Parameters
     ----------
+    time_dim:
+        Size for audio time dimension
     batch_size : int
         The batch size for the DataLoader
     shuffle : bool
@@ -219,7 +232,7 @@ def load_data(batch_size: int = 1, shuffle: bool = False,
         The testing dataloader
     '''
     # Create the dataset
-    dataset = IEMOCAP_Dataset(DATA_PATH)
+    dataset = IEMOCAP_Dataset(DATA_PATH, audio_time=time_dim)
 
     # Split the dataset into training and testing
     test_size = int(TEST_SIZE * len(dataset))
