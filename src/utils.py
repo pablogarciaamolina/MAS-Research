@@ -7,6 +7,7 @@ from torch.jit import RecursiveScriptModule
 import os
 import random
 
+MODELS_PATH: str = "trained_models"
 
 @torch.no_grad()
 def parameters_to_double(model: torch.nn.Module) -> None:
@@ -33,12 +34,12 @@ def save_model(model: torch.nn.Module, name: str) -> None:
     """
 
     # create folder if it does not exist
-    if not os.path.isdir("models"):
-        os.makedirs("models")
+    if not os.path.isdir(MODELS_PATH):
+        os.makedirs(MODELS_PATH)
 
     # save scripted model
     model_scripted: RecursiveScriptModule = torch.jit.script(model.cpu())
-    model_scripted.save(f"models/{name}.pt")
+    model_scripted.save(f"{MODELS_PATH}/{name}.pt")
 
     return None
 
@@ -55,7 +56,7 @@ def load_model(name: str) -> RecursiveScriptModule:
     """
 
     # define model
-    model: RecursiveScriptModule = torch.jit.load(f"models/{name}.pt")
+    model: RecursiveScriptModule = torch.jit.load(f"{MODELS_PATH}/{name}.pt")
 
     return model
 
@@ -108,3 +109,26 @@ def compute_mae(predicted: torch.Tensor, actual: torch.Tensor) -> float:
     mae = torch.mean(absolute_diff)
 
     return float(mae)
+
+def compute_accuracy(predictions: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+    """
+    This function computes the accuracy.
+
+    Args:
+        predictions: predictions tensor. Dimensions:
+            [batch, num classes] or [batch].
+        targets: targets tensor. Dimensions: [batch, 1] or [batch].
+
+    Returns:
+        the accuracy in a tensor of a single element.
+    """
+
+    # TODO
+
+    if len(predictions.shape) > 1:
+
+        predictions = torch.argmax(predictions, dim=1)
+    
+    targets = torch.squeeze(targets)
+
+    return (predictions == targets).float().mean()

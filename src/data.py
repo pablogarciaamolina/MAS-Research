@@ -8,6 +8,79 @@ from transformers import BertTokenizer
 from scipy import signal
 from scipy.io import wavfile
 
+class IEMOCAP_Dataset(Dataset):
+    '''Customized dataset for the IEMOCAP dataset.
+    It will contain audio, text, and emotion labels.
+    Additionally, it will apply preprocessing to both
+    audio (by converting it to a spectrogram) and text
+    (by tokenizing it using the BERT tokenizer).
+
+    Parameters
+    ----------
+    data_path : str
+        The path to the data folder (as such, the data,
+        with the audio, text, and emotion files, should
+        already be stored there).
+    '''
+
+    def __init__(self, data_path: str):
+        # Paths to the folders
+        self.audio_dir = os.path.join(data_path, "Audio")
+        self.text_dir = os.path.join(data_path, "Text")
+        self.emotion_dir = os.path.join(data_path, "Emotion/Utterances")
+
+        # Get the list of files
+        self.files = os.listdir(self.audio_dir)
+        # Take only the file name (without the extension)
+        self.files = [file.split(".")[0] for file in self.files]
+        # Method to tokenize text
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-cased') 
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        # Get the file name
+        file = self.files[idx]
+
+        # Text
+        text_file = os.path.join(self.text_dir, file + ".txt")
+        with open(text_file, "r") as f:
+            text = f.read()
+
+        # Tokenize the text
+        encoding = self.tokenizer.encode_plus(
+                text,
+                add_special_tokens=True,
+                max_length=128,
+                truncation=True,
+                return_token_type_ids=False,
+                pad_to_max_length=True,
+                return_attention_mask=True,
+                return_tensors='pt')
+
+        # Get the input_ids and attention_mask
+        input_ids: torch.Tensor = encoding['input_ids'].squeeze(0)
+        attention_mask: torch.Tensor = encoding['attention_mask'].squeeze(0)
+
+        # Audio
+        audio_file = os.path.join(self.audio_dir, file + ".wav")
+        # Transform the audio file to a spectrogram
+        spectrogram = audio2spectrogram(audio_file)
+        spectrogram = get_3d_spec(spectrogram)
+        # Transpose to match PyTorch's format
+        npimg = np.transpose(spectrogram, (2, 0, 1))
+        # Convert to tensor
+        audio: torch.Tensor = torch.tensor(npimg)
+
+        # Emotion
+        emotion_file = os.path.join(self.emotion_dir, file + ".txt")
+        with open(emotion_file, "r") as f:
+            emotion = f.read()
+        # Convert the emotion to an integer (0-9)
+        emotion = int(emotion)
+
+        return audio, input_ids, attention_mask, torch.tensor(emotion)
 
 def log_specgram(audio: np.array, sample_rate: int, window_size: int = 20,
                  step_size: int = 10, eps: float = 1e-10):
@@ -112,80 +185,6 @@ def get_3d_spec(Sxx_in, moments=None):
                      arr in (base, delta, delta2)]
     return np.concatenate(stacked, axis=2)
 
-
-class IEMOCAP_Dataset(Dataset):
-    '''Customized dataset for the IEMOCAP dataset.
-    It will contain audio, text, and emotion labels.
-    Additionally, it will apply preprocessing to both
-    audio (by converting it to a spectrogram) and text
-    (by tokenizing it using the BERT tokenizer).
-
-    Parameters
-    ----------
-    data_path : str
-        The path to the data folder (as such, the data,
-        with the audio, text, and emotion files, should
-        already be stored there).
-    '''
-
-    def __init__(self, data_path: str):
-        # Paths to the folders
-        self.audio_dir = os.path.join(data_path, "Audio")
-        self.text_dir = os.path.join(data_path, "Text")
-        self.emotion_dir = os.path.join(data_path, "Emotion/Utterances")
-
-        # Get the list of files
-        self.files = os.listdir(self.audio_dir)
-        # Take only the file name (without the extension)
-        self.files = [file.split(".")[0] for file in self.files]
-        # Method to tokenize text
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-cased') 
-
-    def __len__(self):
-        return len(self.files)
-
-    def __getitem__(self, idx):
-        # Get the file name
-        file = self.files[idx]
-
-        # Text
-        text_file = os.path.join(self.text_dir, file + ".txt")
-        with open(text_file, "r") as f:
-            text = f.read()
-
-        # Tokenize the text
-        encoding = self.tokenizer.encode_plus(
-                text,
-                add_special_tokens=True,
-                max_length=128,
-                truncation=True,
-                return_token_type_ids=False,
-                pad_to_max_length=True,
-                return_attention_mask=True,
-                return_tensors='pt')
-
-        # Get the input_ids and attention_mask
-        input_ids: torch.Tensor = encoding['input_ids'].squeeze(0)
-        attention_mask: torch.Tensor = encoding['attention_mask'].squeeze(0)
-
-        # Audio
-        audio_file = os.path.join(self.audio_dir, file + ".wav")
-        # Transform the audio file to a spectrogram
-        spectrogram = audio2spectrogram(audio_file)
-        spectrogram = get_3d_spec(spectrogram)
-        # Transpose to match PyTorch's format
-        npimg = np.transpose(spectrogram, (2, 0, 1))
-        # Convert to tensor
-        audio: torch.Tensor = torch.tensor(npimg)
-
-        # Emotion
-        emotion_file = os.path.join(self.emotion_dir, file + ".txt")
-        with open(emotion_file, "r") as f:
-            emotion = f.read()
-        # Convert the emotion to an integer (0-9)
-        emotion = int(emotion)
-
-        return audio, input_ids, attention_mask, torch.tensor(emotion)
 
 
 if __name__ == "__main__":

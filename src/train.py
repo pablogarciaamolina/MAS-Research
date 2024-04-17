@@ -7,6 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import tqdm
 from typing import Final
 import signal
+import time
 
 # own modules
 from src.utils import (
@@ -15,6 +16,8 @@ from src.utils import (
     interruption_save_handler_wrapper,
     parameters_to_double,
 )
+from models import Audio_Text_MSA_Model
+from src.train_functions import train_step, val_step
 
 # static variables
 DATA_PATH: Final[str] = "data"
@@ -36,16 +39,16 @@ def main() -> None:
     epochs: int = ...
     lr: float = ...
     batch_size: int = ...
-    past_days: int = ...
-    hidden_size: int = ...
-    num_layers: int = ...
     dropout: float = ...
-    bidirectional = ...
+    C: int = 256
+    lrn_mode: str = "full"
+    lambd: float = 0.3
 
     # Scheduler
     weight_decay = ...
     max_iter = ...
     lr_min = ...
+    milestones: list[int] = [15, 30, 60]
     # -----------------------
 
     # -------LOADING---------
@@ -61,23 +64,36 @@ def main() -> None:
     open("nohup.out", "w").close()
 
     # SAVING PATH AND PROGRESS TRACKER
-    name = ...
+    name = f"Audio_and_Text_Model_time_{time.time()}"
     writer: SummaryWriter = SummaryWriter(f"runs/{name}")
 
     # MODEL
-    inputs: torch.Tensor = next(iter(train_data))[0]
-    model: torch.nn.Module = ...().to(device)
+    audio_inputs, text_inputs, _, _ = next(iter(train_data)) # [batch, f, t, c], ?, _, _
+    model: torch.nn.Module = Audio_Text_MSA_Model(
+        audio_inputs.shape[3],
+        audio_inputs.shape[1] * audio_inputs.shape[2],
+        ...,
+        10,
+        C=C,
+        lrn_mode=lrn_mode,
+        lambd=lambd,
+        dropout=dropout
+    ).to(device)
     # Set parameters to double
     parameters_to_double(model)
 
     # LOSS
-    loss: torch.nn.Module = ...
+    loss: torch.nn.Module = torch.nn.CrossEntropyLoss()
 
     # OPTIMIZER
-    optimizer: torch.optim.Optimizer = ...
+    optimizer: torch.optim.Optimizer = torch.optim.AdamW(
+        model.parameters(), 
+        ..., 
+        weight_decay=weight_decay
+    )
 
     # SCHEDULER
-    scheduler = ...
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones)
 
     # EARLY STOPPING
     # register handler for ¡manual! EARLY STOPPING
@@ -87,14 +103,29 @@ def main() -> None:
     # ------------TRAINING------------
     for epoch in tqdm(range(epochs)):
         # call train step
-        ...
+        train_loss, train_accuracy = train_step(
+            model,
+            train_data,
+            loss,
+            optimizer,
+            writer,
+            epoch,
+            device
+        )
 
         # call val step
-        ...
+        val_loss, val_accuracy = val_step(
+            model,
+            val_data,
+            loss,
+            writer,
+            epoch,
+            device
+        )
 
         print(
-            f"Train and Val. mae in epoch {epoch}, lr {scheduler.get_lr()}:",
-            (round(..., 4), round(..., 4)),
+            f"Train and Val. accuracy in epoch {epoch}, lr {scheduler.get_lr()}:",
+            (round(train_accuracy, 4), round(val_accuracy, 4)),
         )
 
         # Compute scheduler step
