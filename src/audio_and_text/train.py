@@ -89,7 +89,7 @@ def main() -> None:
     # OPTIMIZER
     optimizer: torch.optim.Optimizer = torch.optim.AdamW(
         model.parameters(), 
-        lr=lr 
+        lr=lr,
         weight_decay=weight_decay
     )
 
