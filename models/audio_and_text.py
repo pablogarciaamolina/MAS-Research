@@ -2,7 +2,7 @@ import torch
 from .audio import AlexNet_Based_FCN, Audio_Attention
 from .text import PretrainedBERT
 
-class Audio_Text_MSA_Model(torch.Module):
+class Audio_Text_MSA_Model(torch.nn.Module):
     """
     Implementation of multimodal approach on emotion recognition using audio and text.
     Model described in "Audio-and-text-based-emotion-recognition" https://github.com/aris-ai/Audio-and-text-based-emotion-recognition/tree/master.

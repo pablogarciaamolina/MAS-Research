@@ -1,6 +1,6 @@
 import torch
 
-class Audio_Attention(torch.Module):
+class Audio_Attention(torch.nn.Module):
     """
     Implementation of the attention module that proceeds the AlexNet-based FCN in the model described on "Attention
     Based Fully Convolutional Network for Speech Emotion Recognition" (https://arxiv.org/pdf/1806.01506v2.pdf).

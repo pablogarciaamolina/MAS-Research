@@ -7,7 +7,7 @@ class LRN_MODES(enum.Enum):
     SINGLE = "single"
 
 
-class AlexNet_Based_FCN(torch.Module):
+class AlexNet_Based_FCN(torch.nn.Module):
     """
     Implementation of FCN based on the AlexNet architecture for emotion recognition
     using on 3D spectrogram representation of audio input. Based on the paper "Attention
