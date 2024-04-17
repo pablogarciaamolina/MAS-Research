@@ -28,6 +28,7 @@ class PretrainedBERT(nn.Module):
         Constructor of the PretrainedBERT class.
         """
         self.bert = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels = num_labels, output_attentions = True, output_hidden_states = False)
+        self.hidden_size = self.bert.config.hidden_size
         #self.dropout = nn.Dropout(0.1)
         
     def forward(self, input_ids, attention_mask):

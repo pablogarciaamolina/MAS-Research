@@ -29,7 +29,6 @@ class Audio_Text_MSA_Model(torch.Module):
             self, 
             in_audio_channels: int, 
             L: int,
-            hidden_size: int,
             num_classes: int,
             C: int = 256,
             lrn_mode: str = "full", 
@@ -42,7 +41,6 @@ class Audio_Text_MSA_Model(torch.Module):
         Args:
             in_channels: input channels in the audio spectrograms.
             L: size of the vectors in space A for audio processing.
-            hidden_size: the size of the hidden states.
             num_classes: number of classes for clasification.
 
             C: size of channelsin spectrogram representation of the audio. Defaults to 256.
@@ -64,14 +62,14 @@ class Audio_Text_MSA_Model(torch.Module):
 
         # TEXT ONLY
         self.bert = PretrainedBERT(
-            hidden_size=hidden_size,
             num_labels=num_classes
         )
+        self.hidden_size: int = self.bert.hidden_size
 
         # AUDIO AND TEXT
         self.clasificator = torch.nn.Sequential(
             torch.nn.Dropout(dropout),
-            torch.nn.Linear(C*hidden_size, num_classes)
+            torch.nn.Linear(C*self.hidden_size, num_classes)
         )
 
     def forward(self,
