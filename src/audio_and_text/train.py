@@ -18,6 +18,7 @@ from src.utils import (
 )
 from models import Audio_Text_MSA_Model
 from .train_functions import train_step, val_step
+from src.data.IEMOCAP import load_data
 
 # static variables
 DATA_PATH: Final[str] = "data"
@@ -36,10 +37,10 @@ def main() -> None:
 
     # TODO
     # ----HYPERPARAMETERS----
-    epochs: int = ...
-    lr: float = ...
-    batch_size: int = ...
-    dropout: float = ...
+    epochs: int = 100
+    lr: float = 0.01
+    batch_size: int = 64
+    dropout: float = 0.4
     C: int = 256
     lrn_mode: str = "full"
     lambd: float = 0.3
@@ -48,6 +49,7 @@ def main() -> None:
     weight_decay = ...
     max_iter = ...
     lr_min = ...
+    gamma = 0.1
     milestones: list[int] = [15, 30, 60]
     # -----------------------
 
@@ -55,7 +57,7 @@ def main() -> None:
     print("Loading data...")
     train_data: DataLoader
     val_data: DataLoader
-    train_data, val_data, _, = ...
+    train_data, val_data, _, = load_data(batch_size=batch_size)
     print("DONE")
 
     # ------------PRE-TRAINING-----------
@@ -72,7 +74,6 @@ def main() -> None:
     model: torch.nn.Module = Audio_Text_MSA_Model(
         audio_inputs.shape[3],
         audio_inputs.shape[1] * audio_inputs.shape[2],
-        ...,
         10,
         C=C,
         lrn_mode=lrn_mode,
@@ -88,12 +89,12 @@ def main() -> None:
     # OPTIMIZER
     optimizer: torch.optim.Optimizer = torch.optim.AdamW(
         model.parameters(), 
-        ..., 
+        lr=lr 
         weight_decay=weight_decay
     )
 
     # SCHEDULER
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=gamma)
 
     # EARLY STOPPING
     # register handler for ¡manual! EARLY STOPPING
