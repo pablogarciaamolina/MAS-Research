@@ -29,9 +29,9 @@ class Audio_Text_MSA_Model(torch.Module):
             self, 
             in_audio_channels: int, 
             L: int,
-            C: int,
             hidden_size: int,
             num_classes: int,
+            C: int = 256,
             lrn_mode: str = "full", 
             lambd: float = 0.3, 
             dropout: float = 0.4
@@ -42,10 +42,10 @@ class Audio_Text_MSA_Model(torch.Module):
         Args:
             in_channels: input channels in the audio spectrograms.
             L: size of the vectors in space A for audio processing.
-            C: size of channelsin spectrogram representation of the audio.
             hidden_size: the size of the hidden states.
             num_classes: number of classes for clasification.
-            
+
+            C: size of channelsin spectrogram representation of the audio. Defaults to 256.
             lrn_mode: mode for the LRN in the AlexNet for audio processing, number of neighbouring channels to use. Sets
             to 'full', 'half' or 'single'. Defaults to FULL
             lambd: lambda scale factor which controls the uniformity of the importance weights of the annotation vectors in the attention layer. Ranges between 0 and 1. Defaults to 0.3
@@ -55,7 +55,7 @@ class Audio_Text_MSA_Model(torch.Module):
         super().__init__()
 
         # AUDIO ONLY
-        self.alexnet = AlexNet_Based_FCN(in_channels=in_audio_channels, lrn_mode=lrn_mode)
+        self.alexnet = AlexNet_Based_FCN(in_channels=in_audio_channels, C=C, lrn_mode=lrn_mode)
         self.attention = Audio_Attention(L=L, lambd=lambd)
         self.audio_linear = torch.nn.Sequential(
             torch.nn.Flatten(start_dim=2),

@@ -42,12 +42,13 @@ class AlexNet_Based_FCN(torch.Module):
 
     """
 
-    def __init__(self, in_channels: int, lrn_mode: str = "full") -> None:
+    def __init__(self, in_channels: int, C: int = 256, lrn_mode: str = "full") -> None:
         """
         Constructor for the AlexNet-Based FCN
 
         Args:
             in_channels: input channels
+            C: number of output channels for the FCN. Defaults to 256 (based on AlexNet)
             lrn_mode: mode for the LRN, number of neighbouring channels to use. Sets
             to 'full', 'half' or 'single'. Defaults to FULL
         """
@@ -88,7 +89,7 @@ class AlexNet_Based_FCN(torch.Module):
             torch.nn.ReLU(),
             torch.nn.Conv2d(
                 in_channels=384,
-                out_channels=256,
+                out_channels=C,
                 kernel_size=(3, 3),
                 padding=1,
             ),
