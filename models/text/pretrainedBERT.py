@@ -1,7 +1,7 @@
 # Path: models/pretrainedBERT.py
 import torch
 import torch.nn as nn
-from transformers import BertForSequenceClassification
+from transformers import BertModel
 
 class PretrainedBERT(nn.Module):
     """
@@ -15,7 +15,7 @@ class PretrainedBERT(nn.Module):
         """
         Constructor of the PretrainedBERT class.
         """
-        self.bert = BertForSequenceClassification.from_pretrained('bert-base-uncased', output_attentions = True, output_hidden_states = False)
+        self.bert = BertModel.from_pretrained('bert-base-uncased', output_attentions = True, output_hidden_states = False)
         self.hidden_size = self.bert.config.hidden_size
         
     def forward(self, input_ids, attention_mask):
