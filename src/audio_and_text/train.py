@@ -47,7 +47,7 @@ def main() -> None:
     time_dim: int = 1500
 
     # Scheduler
-    weight_decay = ...
+    weight_decay = 0.01
     max_iter = ...
     lr_min = ...
     gamma = 0.1
@@ -73,9 +73,8 @@ def main() -> None:
     # MODEL
     audio_inputs, text_inputs, _, _ = next(iter(train_data)) # [batch, f, t, c], ?, _, _
     model: torch.nn.Module = Audio_Text_MSA_Model(
-        audio_inputs.shape[3],
-        audio_inputs.shape[1] * audio_inputs.shape[2],
-        10,
+        f_t_c=audio_inputs.shape[1:],
+        num_classes=10,
         C=C,
         lrn_mode=lrn_mode,
         lambd=lambd,

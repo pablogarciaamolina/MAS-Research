@@ -111,13 +111,32 @@ class AlexNet_Based_FCN(torch.nn.Module):
         """
 
         assert mode.lower() in list(map(lambda x: x.value, LRN_MODES))
-
-        if mode == LRN_MODES.FULL:
+        mode = mode.lower()
+        if mode == LRN_MODES.FULL.value:
             return in_channels
-        elif mode == LRN_MODES.HALF:
+        elif mode == LRN_MODES.HALF.value:
             return in_channels // 2
-        elif mode == LRN_MODES.SINGLE:
+        elif mode == LRN_MODES.SINGLE.value:
             return 1
+        
+    def get_out_dims(self, in_dims: tuple[int, int, int, int]) -> tuple:
+        """
+        Calculates the shape of the dimension using the simplest use case and passing it through the FCN
+
+        Args:
+            in_dims: incoming dimension to predicts their out dimension. Must be of the shape:
+                `[batch, f, t, c]`
+        
+        Returns:
+            Output dimensions in a tuple in the shape: `[batch, F, T, C]`
+        """
+
+        mock_in: torch.Tensor = torch.zeros(1,*in_dims)
+
+        with torch.no_grad():
+            mock_out: torch.Tensor = self.forward(mock_in)
+        
+        return tuple(mock_out.shape)
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         """
@@ -126,7 +145,7 @@ class AlexNet_Based_FCN(torch.nn.Module):
 
         Args:
             inputs: Input tensor.\
-                [batch, f (in frequency dim), t (in time dim),in channels]
+                [batch, f (in frequency dim), t (in time dim), in channels]
 
         Return:
             Output tensor.\

@@ -27,8 +27,7 @@ class Audio_Text_MSA_Model(torch.nn.Module):
 
     def __init__(
             self, 
-            in_audio_channels: int, 
-            L: int,
+            f_t_c: tuple[int],
             num_classes: int,
             C: int = 256,
             lrn_mode: str = "full", 
@@ -39,8 +38,7 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         Constructor for the model
 
         Args:
-            in_channels: input channels in the audio spectrograms.
-            L: size of the vectors in space A for audio processing.
+            f_t_c: dimensions of the spectrogram, where f is the in frequency, t is the in time, and c in the in channels
             num_classes: number of classes for clasification.
 
             C: size of channelsin spectrogram representation of the audio. Defaults to 256.
@@ -52,9 +50,13 @@ class Audio_Text_MSA_Model(torch.nn.Module):
 
         super().__init__()
 
+        f, t, c = f_t_c
+
         # AUDIO ONLY
-        self.alexnet = AlexNet_Based_FCN(in_channels=in_audio_channels, C=C, lrn_mode=lrn_mode)
-        self.attention = Audio_Attention(L=L, lambd=lambd)
+        self.alexnet = AlexNet_Based_FCN(in_channels=c, C=C, lrn_mode=lrn_mode)
+        _, F, T, _ = self.alexnet.get_out_dims(f_t_c)
+        L = F * T
+        self.attention = Audio_Attention(L=L, C=C, lambd=lambd)
         self.audio_linear = torch.nn.Sequential(
             torch.nn.Flatten(start_dim=2),
             torch.nn.Linear(L, 1),

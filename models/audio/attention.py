@@ -14,12 +14,13 @@ class Audio_Attention(torch.nn.Module):
     The final result is the tensor c with size C. This vector is the weighted sum of the tensors in space A.
     """
 
-    def __init__(self, L: int, lambd: float = 0.3) -> None:
+    def __init__(self, L: int, C: int, lambd: float = 0.3) -> None:
         """
         This is the constructor for the class
 
         Args:
-            L: size of the vectors in space A
+            L: size of space A
+            C: size of vectors in A
             lambd: lambda scale factor which controls the uniformity of the importance weights of the annotation vectors. Ranges between 0 and 1. Defaults to 0.3
         """
         
@@ -28,10 +29,10 @@ class Audio_Attention(torch.nn.Module):
 
         # MLP layer
         # It will recieve a tensor of shape [batch size, C, L] and return a tensor [batch, C, L] with the new representation of A 
-        self.mlp = torch.nn.Linear(L, L)
+        # self.mlp = torch.nn.Linear(L, L)
 
         # Learnable vector u
-        self.u = torch.nn.Parameter(torch.randn(L, 1))
+        self.u = torch.nn.Parameter(torch.randn(C, 1))
         torch.nn.init.xavier_normal_(self.u)
 
         # Save lambda parameter
@@ -47,25 +48,27 @@ class Audio_Attention(torch.nn.Module):
 
         Return:
             The tensor containing the emotion vectors. [batch, C]
-        """
+        """ 
 
         # Reshape the inputs to the space A
-        space_A = inputs.view(inputs.shape[0], inputs.shape[-1], -1) # [batch, C, L]
+        inputs = inputs.permute(0, 3, 1, 2)
+        space_A = inputs.view(inputs.shape[0], inputs.shape[1], -1) # [batch, C, L]
 
-        # Apply MLP layer to obtain new representations of A
-        new_A = self.mlp(space_A)  # [batch, C, L]
+        assert self.L == space_A.shape[-1]
 
-        # Obtain importance weights e [batch, C]
+        # # Apply MLP layer to obtain new representations of A
+        # space_A = self.mlp(space_A)  # [batch, C, L]
+
+        # Obtain importance weights e [batch, L]
         e = torch.matmul(
-            self.u.t(),
-            torch.tanh(new_A).permute(2, 1, 0)
-        ).squeeze().permute(1, 0)
+            torch.tanh(space_A).permute(0, 2, 1),
+            self.u
+        ).squeeze() 
 
         # Obtain normalized importance weights
-        alpha = torch.softmax(self.lambd * e) # [batch, C]
+        alpha = torch.softmax(self.lambd * e, dim=1) # [batch, L]
 
         # Calculate emotion tensor
-        assert len((alpha * space_A).shape) == 3 ## !!! erase
-        c = alpha * torch.sum(alpha * space_A, 2)
+        c = torch.sum(alpha.unsqueeze(1) * space_A, 2) # [batch, C]
 
         return c

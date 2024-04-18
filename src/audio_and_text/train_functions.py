@@ -51,10 +51,10 @@ def train_step(
     # TODO
     for spectrograms, tokens, attention_masks, targets in train_data:
         # Pass data and labels to the correct device
-        spectrograms.to(device)
-        attention_masks.to(device)
-        tokens.to(device)
-        targets.to(device)
+        spectrograms = spectrograms.to(device)
+        attention_masks = attention_masks.to(device)
+        tokens = tokens.to(device)
+        targets = targets.to(device)
 
         # Fordward pass
         outputs = model(spectrograms, tokens, attention_masks)
@@ -121,10 +121,10 @@ def val_step(
         
         with torch.no_grad():
             # Pass data and labels to the correct device
-            spectrograms.to(device)
-            attention_masks.to(device)
-            tokens.to(device)
-            targets.to(device)
+            spectrograms = spectrograms.to(device)
+            attention_masks = attention_masks.to(device)
+            tokens = tokens.to(device)
+            targets = targets.to(device)
 
             # Forward pass
             outputs = model(spectrograms, tokens, attention_masks)
@@ -175,10 +175,10 @@ def test_step(
         
         with torch.no_grad():
             # Pass data and labels to the correct device
-            spectrograms.to(device)
-            attention_masks.to(device)
-            tokens.to(device)
-            targets.to(device)
+            spectrograms = spectrograms.to(device)
+            attention_masks = attention_masks.to(device)
+            tokens = tokens.to(device)
+            targets = targets.to(device)
 
             # Forward pass
             outputs = model(spectrograms, tokens, attention_masks)

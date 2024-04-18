@@ -84,11 +84,13 @@ class IEMOCAP_Dataset(Dataset):
         npimg = np.transpose(spectrogram, (1, 0, 2))
         # Convert to tensor
         audio: torch.Tensor = torch.tensor(npimg)
-        # Pad to maximum length
+        # Pad and cut to maximum length
         if audio.size(1) < self.audio_time:
             pad_amount = self.audio_time - audio.size(1)
             # Fill with zeros along the time axis
             audio = F.pad(audio, (0, 0, 0, pad_amount), "constant", 0)
+        else:
+            audio = audio[:, :self.audio_time, :]
 
         # Emotion
         emotion_file = os.path.join(self.emotion_dir, file + ".txt")
@@ -97,7 +99,7 @@ class IEMOCAP_Dataset(Dataset):
         # Convert the emotion to an integer (0-9)
         emotion = int(emotion)
 
-        return audio, input_ids, attention_mask, torch.tensor(emotion)
+        return audio.type(torch.double), input_ids.type(torch.long), attention_mask.type(torch.double), torch.tensor(emotion, dtype=torch.double)
 
 
 def log_specgram(audio: np.array, sample_rate: int, window_size: int = 20,
