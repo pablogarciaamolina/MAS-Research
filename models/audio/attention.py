@@ -54,8 +54,6 @@ class Audio_Attention(torch.nn.Module):
         inputs = inputs.permute(0, 3, 1, 2)
         space_A = inputs.view(inputs.shape[0], inputs.shape[1], -1) # [batch, C, L]
 
-        assert self.L == space_A.shape[-1]
-
         # # Apply MLP layer to obtain new representations of A
         # space_A = self.mlp(space_A)  # [batch, C, L]
 

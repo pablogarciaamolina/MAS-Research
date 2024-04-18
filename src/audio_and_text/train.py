@@ -71,7 +71,7 @@ def main() -> None:
     writer: SummaryWriter = SummaryWriter(f"runs/{name}")
 
     # MODEL
-    audio_inputs, text_inputs, _, _ = next(iter(train_data)) # [batch, f, t, c], ?, _, _
+    audio_inputs, text_inputs , _ = next(iter(train_data)) # [batch, f, t, c], ?, _, _
     model: torch.nn.Module = Audio_Text_MSA_Model(
         f_t_c=audio_inputs.shape[1:],
         num_classes=10,

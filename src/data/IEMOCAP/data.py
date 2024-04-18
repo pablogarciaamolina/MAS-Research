@@ -61,19 +61,8 @@ class IEMOCAP_Dataset(Dataset):
             text = f.read()
 
         # Tokenize the text
-        encoding = self.tokenizer.encode_plus(
-                text,
-                add_special_tokens=True,
-                max_length=128,
-                truncation=True,
-                return_token_type_ids=False,
-                padding='max_length',
-                return_attention_mask=True,
-                return_tensors='pt')
-
-        # Get the input_ids and attention_mask
-        input_ids: torch.Tensor = encoding['input_ids'].squeeze(0)
-        attention_mask: torch.Tensor = encoding['attention_mask'].squeeze(0)
+        tokens = self.tokenizer(text,return_tensors='pt',padding=True,truncation=True)
+        text_tensor = torch.tensor(self.tokenizer.convert_tokens_to_ids(tokens))
 
         # Audio
         audio_file = os.path.join(self.audio_dir, file + ".wav")
@@ -99,7 +88,7 @@ class IEMOCAP_Dataset(Dataset):
         # Convert the emotion to an integer (0-9)
         emotion = int(emotion)
 
-        return audio.type(torch.double), input_ids.type(torch.long), attention_mask.type(torch.double), torch.tensor(emotion, dtype=torch.double)
+        return audio.type(torch.double), text_tensor.type(torch.long), torch.tensor(emotion, dtype=torch.double)
 
 
 def log_specgram(audio: np.array, sample_rate: int, window_size: int = 20,

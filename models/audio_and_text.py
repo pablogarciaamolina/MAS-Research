@@ -1,6 +1,6 @@
 import torch
 from .audio import AlexNet_Based_FCN, Audio_Attention
-from .text import PretrainedBERT
+from .text import PretrainedBERT, BertEmbeddings
 
 class Audio_Text_MSA_Model(torch.nn.Module):
     """
@@ -63,21 +63,20 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         )
 
         # TEXT ONLY
-        self.bert = PretrainedBERT(
-            num_labels=num_classes
-        )
-        self.hidden_size: int = self.bert.hidden_size
+        # self.bert = PretrainedBERT(
+        # )
+        self.bert = BertEmbeddings()
+        # self.hidden_size: int = self.bert.hidden_size
 
         # AUDIO AND TEXT
         self.clasificator = torch.nn.Sequential(
             torch.nn.Dropout(dropout),
-            torch.nn.Linear(C*self.hidden_size, num_classes)
+            # torch.nn.Linear(C+self.hidden_size, num_classes)
         )
 
     def forward(self,
             audio_inputs: torch.Tensor, 
             text_inputs: torch.Tensor,
-            attention_mask: torch.Tensor
         ) -> torch.Tensor:
         """
         Forward method of the model
@@ -93,14 +92,14 @@ class Audio_Text_MSA_Model(torch.nn.Module):
 
         # AUDIO ONLY
         out_alexnet = self.alexnet(audio_inputs)
-        out_audio = self.attention(out_alexnet)
+        out_audio = self.attention(out_alexnet) # [batch, C]
         # out_audio = self.audio_linear(out_alexnet)
 
         # TEXT ONLY
-        out_text = self.bert(text_inputs, attention_mask)
+        out_text = self.bert(text_inputs) # ?
 
         # AUDIO AND TEXT
-        fusioned_features: torch.Tensor = torch.concat([out_audio, out_text], dim=...) # ?
+        fusioned_features: torch.Tensor = torch.concat([out_audio, out_text], dim=1) # ?
         outputs = self.clasificator(fusioned_features)
 
         return outputs

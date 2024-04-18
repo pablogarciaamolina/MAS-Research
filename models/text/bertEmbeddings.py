@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from transformers import BertModel, BertTokenizer
+from transformers import BertModel
 
 class BertEmbeddings(nn.Module):
     
@@ -10,7 +10,6 @@ class BertEmbeddings(nn.Module):
         Constructor of the BertEmbeddings class.
         """
         self.bert = BertModel.from_pretrained('bert-base-uncased')
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         
     # Función para obtener embeddings de una oración utilizando BERT
     def get_emebeddings(self, text):
@@ -25,7 +24,7 @@ class BertEmbeddings(nn.Module):
         # Retornar los embeddings de los tokens
         return embeddings
     
-    def get_embeddings_(self, text):
+    def get_embeddings_(self, tokens):
         """
         Get the embeddings of the input text.
         
@@ -33,13 +32,12 @@ class BertEmbeddings(nn.Module):
             text: str, the input text.
         """
 
-        token = {token: self.tokenizer.get_vocab().items()}
-        embeddings = self.bert.get_input_embeddings()(torch.tensor(token))
+        embeddings = self.bert.get_input_embeddings()(torch.tensor(tokens))
         
         return embeddings
         
     
-    def forward(self, text):
+    def forward(self, tokens):
         """
         Forward pass of the model.
         
@@ -47,7 +45,7 @@ class BertEmbeddings(nn.Module):
             text: str, the input text.
         """
         # Obtener los embeddings de la oración
-        embeddings = self.get_emebeddings(text)
+        embeddings = self.get_embeddings_(tokens)
         
         return embeddings
     
