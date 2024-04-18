@@ -65,7 +65,7 @@ def train_step(
 
         # Save accuracy metric
         accuracy = compute_accuracy(outputs, targets)
-        accuracies.append(accuracy)
+        accuracies.append(accuracy.item())
 
         # Backward pass
         optimizer.zero_grad()
@@ -134,7 +134,7 @@ def val_step(
 
         # Save accuracy metric
         accuracy = compute_accuracy(outputs, targets)
-        accuracies.append(accuracy)
+        accuracies.append(accuracy.item())
 
     # write on tensorboard
     writer.add_scalar("val/loss", np.mean(losses), epoch)
@@ -183,6 +183,6 @@ def test_step(
         # METRICS
         # Save accuracy metric
         accuracy = compute_accuracy(outputs, targets)
-        accuracies.append(accuracy)
+        accuracies.append(accuracy.item())
 
     return float(np.mean(accuracies))

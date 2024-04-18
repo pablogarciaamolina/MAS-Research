@@ -88,7 +88,7 @@ class IEMOCAP_Dataset(Dataset):
         # Convert the emotion to an integer (0-9)
         emotion = int(emotion)
 
-        return audio.type(torch.double), text_tensor.type(torch.long), torch.tensor(emotion, dtype=torch.double)
+        return audio.type(torch.double), text_tensor.type(torch.long), torch.tensor(emotion, dtype=torch.long)
 
 
 def log_specgram(audio: np.array, sample_rate: int, window_size: int = 20,
