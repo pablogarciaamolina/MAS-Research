@@ -1,10 +1,6 @@
 import torch
 from .audio import AlexNet_Based_FCN, Audio_Attention
-<<<<<<< HEAD
 from .text import PretrainedBERT, BertEmbeddings
-=======
-from .text import bertEmbeddings
->>>>>>> a1d98c1e5cba0f1c0655b4955067ef75c375194c
 
 class Audio_Text_MSA_Model(torch.nn.Module):
     """
@@ -67,14 +63,10 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         )
 
         # TEXT ONLY
-<<<<<<< HEAD
         # self.bert = PretrainedBERT(
         # )
         self.bert = BertEmbeddings()
         # self.hidden_size: int = self.bert.hidden_size
-=======
-        self.bert = bertEmbeddings()
->>>>>>> a1d98c1e5cba0f1c0655b4955067ef75c375194c
 
         # AUDIO AND TEXT
         self.clasificator = torch.nn.Sequential(
