@@ -12,7 +12,7 @@ class BertEmbeddings(nn.Module):
         self.bert = BertModel.from_pretrained('bert-base-uncased')
         
     # Función para obtener embeddings de una oración utilizando BERT
-    def get_emebeddings(self, text):
+    def get_embeddings(self, text):
         # Tokenizar la oración y convertirla en tensores
         tokens = self.tokenizer(text, return_tensors='pt', padding=True, truncation=True)
         
@@ -21,7 +21,6 @@ class BertEmbeddings(nn.Module):
             outputs = self.bert(**tokens)
             embeddings = outputs.last_hidden_state  # Última capa oculta de BERT
         
-        # Retornar los embeddings de los tokens
         return embeddings
     
     def get_embeddings_(self, tokens):
@@ -49,4 +48,5 @@ class BertEmbeddings(nn.Module):
         
         return embeddings
     
+
 
