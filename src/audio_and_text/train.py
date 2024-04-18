@@ -45,6 +45,7 @@ def main() -> None:
     lrn_mode: str = "full"
     lambd: float = 0.3
     time_dim: int = 1500
+    embedding_dim = 1000
 
     # Scheduler
     weight_decay = 0.01
@@ -71,10 +72,12 @@ def main() -> None:
     writer: SummaryWriter = SummaryWriter(f"runs/{name}")
 
     # MODEL
-    audio_inputs, text_inputs , _ = next(iter(train_data)) # [batch, f, t, c], ?, _, _
+    audio_inputs, text_inputs , _ = next(iter(train_data)) # [batch, f, t, c], [batch, seq, ?]?, _, _
     model: torch.nn.Module = Audio_Text_MSA_Model(
         f_t_c=audio_inputs.shape[1:],
         num_classes=10,
+        seq_dim=text_inputs.shape[1],
+        embedding_dim=embedding_dim,
         C=C,
         lrn_mode=lrn_mode,
         lambd=lambd,

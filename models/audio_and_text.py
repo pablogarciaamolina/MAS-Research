@@ -29,6 +29,8 @@ class Audio_Text_MSA_Model(torch.nn.Module):
             self, 
             f_t_c: tuple[int],
             num_classes: int,
+            seq_dim: int,
+            embedding_dim: int = 1000,
             C: int = 256,
             lrn_mode: str = "full", 
             lambd: float = 0.3, 
@@ -40,7 +42,9 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         Args:
             f_t_c: dimensions of the spectrogram, where f is the in frequency, t is the in time, and c in the in channels
             num_classes: number of classes for clasification.
-
+            seq_dim: size of text sequence
+            
+            embedding_dim: dimension of text embedding
             C: size of channelsin spectrogram representation of the audio. Defaults to 256.
             lrn_mode: mode for the LRN in the AlexNet for audio processing, number of neighbouring channels to use. Sets
             to 'full', 'half' or 'single'. Defaults to FULL
@@ -63,10 +67,7 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         )
 
         # TEXT ONLY
-        # self.bert = PretrainedBERT(
-        # )
-        self.bert = BertEmbeddings()
-        self.hidden_size: int = self.bert.embed_dim
+        self.bert = BertEmbeddings(seq_dim=seq_dim, out_dim=embedding_dim)
 
         # AUDIO AND TEXT
         self.clasificator = torch.nn.Sequential(
