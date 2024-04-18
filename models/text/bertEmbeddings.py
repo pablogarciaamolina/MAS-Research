@@ -31,7 +31,13 @@ class BertEmbeddings(nn.Module):
             text: str, the input text.
         """
 
+<<<<<<< HEAD
         embeddings = self.bert.get_input_embeddings()(torch.tensor(tokens))
+=======
+        tokens = self.tokenizer(text)
+        token_ids = torch.tensor(self.tokenizer.convert_tokens_to_ids(tokens))
+        embeddings = self.bert.get_input_embeddings()(token_ids)
+>>>>>>> a1d98c1e5cba0f1c0655b4955067ef75c375194c
         
         return embeddings
         
@@ -44,7 +50,11 @@ class BertEmbeddings(nn.Module):
             text: str, the input text.
         """
         # Obtener los embeddings de la oración
+<<<<<<< HEAD
         embeddings = self.get_embeddings_(tokens)
+=======
+        embeddings = self.get_embeddings(text)
+>>>>>>> a1d98c1e5cba0f1c0655b4955067ef75c375194c
         
         return embeddings
     
