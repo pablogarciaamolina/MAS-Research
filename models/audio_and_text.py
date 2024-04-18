@@ -66,12 +66,12 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         # self.bert = PretrainedBERT(
         # )
         self.bert = BertEmbeddings()
-        # self.hidden_size: int = self.bert.hidden_size
+        self.hidden_size: int = self.bert.embed_dim
 
         # AUDIO AND TEXT
         self.clasificator = torch.nn.Sequential(
             torch.nn.Dropout(dropout),
-            # torch.nn.Linear(C+self.hidden_size, num_classes)
+            torch.nn.Linear(C+self.hidden_size, num_classes)
         )
 
     def forward(self,

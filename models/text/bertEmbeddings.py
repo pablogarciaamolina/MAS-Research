@@ -10,30 +10,16 @@ class BertEmbeddings(nn.Module):
         Constructor of the BertEmbeddings class.
         """
         self.bert = BertModel.from_pretrained('bert-base-uncased')
+        self.embed_dim = self.bert.config.hidden_size
         
-    # Función para obtener embeddings de una oración utilizando BERT
-    def get_embeddings(self, text):
-        # Tokenizar la oración y convertirla en tensores
+    """ def get_embeddings(self, text):
         tokens = self.tokenizer(text, return_tensors='pt', padding=True, truncation=True)
-        
-        # Obtener embeddings de los tokens utilizando BERT
         with torch.no_grad():
             outputs = self.bert(**tokens)
             embeddings = outputs.last_hidden_state  # Última capa oculta de BERT
         
-        return embeddings
+        return embeddings"""
     
-    def get_embeddings_(self, tokens):
-        """
-        Get the embeddings of the input text.
-        
-        Args:
-            text: str, the input text.
-        """
-
-        embeddings = self.bert.get_input_embeddings()(torch.tensor(tokens))
-        
-        return embeddings
         
     
     def forward(self, tokens):
@@ -44,7 +30,7 @@ class BertEmbeddings(nn.Module):
             text: str, the input text.
         """
         # Obtener los embeddings de la oración
-        embeddings = self.get_embeddings_(tokens)
+        embeddings = self.bert.get_input_embeddings()(torch.tensor(tokens))
         
         return embeddings
     
