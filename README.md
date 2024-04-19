@@ -21,6 +21,8 @@ Finally, be aware this research is conditioned by time as well as computational 
 |   |-- docs
 |   |   |-- MSA_Project_Proposal.pdf
 |   |   |-- MSA_Project_Report.pdf
+|   |-- images
+|   |   |-- Audio-and-Text-Model_image.png
 |   |-- models
 |   |   |-- audio
 |   |   |   |-- __init__.py
