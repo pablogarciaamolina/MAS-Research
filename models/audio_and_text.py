@@ -85,7 +85,6 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         Args:
             audio_inputs: audio spectrogram representation of the audio data. [batch, f, t, c]
             text_inputs: text data representation of the text data. [batch, seq_len]
-            attention_mask: attention mask for the text data. [batch, seq_len]
 
         Return:
             The logits vector (in tensor form) with size the number of classes.
