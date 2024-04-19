@@ -2,12 +2,14 @@ import torch
 import numpy as np
 from torch.utils.data import Dataset, DataLoader, random_split
 import os
-from transformers import BertTokenizer
 import torch.nn.functional as F
 
 # Audio processing
 from scipy import signal
 from scipy.io import wavfile
+
+from .file_management import processed_tensors_management
+from models.text.bertEmbeddings import BertEmbeddings
 
 
 DATA_PATH = "data/IEMOCAP"
@@ -35,6 +37,7 @@ class IEMOCAP_Dataset(Dataset):
     '''
 
     def __init__(self, data_path: str, audio_time: int = 1520):
+        
         self.audio_time = audio_time
         # Paths to the folders
         self.audio_dir = os.path.join(data_path, "Audio")
@@ -45,50 +48,70 @@ class IEMOCAP_Dataset(Dataset):
         self.files = os.listdir(self.audio_dir)
         # Take only the file name (without the extension)
         self.files = [file.split(".")[0] for file in self.files]
-        # Method to tokenize text
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-cased') 
+        
+        self.bert = BertEmbeddings()
+
+        # Process data
+        self._save_embeddings_and_spectrograms()
 
     def __len__(self):
         return len(self.files)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # Get the file name
         file = self.files[idx]
 
-        # Text
-        text_file = os.path.join(self.text_dir, file + ".txt")
-        with open(text_file, "r") as f:
-            text = f.read()
+        path = DATA_PATH + "/" + "Processed_tensors" + "/" + file
 
-        # Tokenize the text
-        tokens = self.tokenizer(text,return_tensors='pt',padding=True,truncation=True)
-        text_tensor = torch.tensor(self.tokenizer.convert_tokens_to_ids(tokens))
+        text: torch.Tensor = torch.load(path + "/" + "text.pt")
+        audio: torch.Tensor = torch.load(path + "/" + "audio.pt")
+        emotion: torch.Tensor = torch.load(path + "/" + "emotion.pt")
+    
+        return  audio, text, emotion
+    
+    def _save_embeddings_and_spectrograms(self) -> None:
+        """
+        Saves in memory the processed data, both the BERT embedded text inputs and
+        the spectrograms of the audio.
+        """
 
-        # Audio
-        audio_file = os.path.join(self.audio_dir, file + ".wav")
-        # Transform the audio file to a spectrogram
-        spectrogram = audio2spectrogram(audio_file)
-        spectrogram = get_3d_spec(spectrogram)
-        # Transpose to match PyTorch's format (F, T, C)
-        npimg = np.transpose(spectrogram, (1, 0, 2))
-        # Convert to tensor
-        audio: torch.Tensor = torch.tensor(npimg)
-        # Pad and cut to maximum length
-        if audio.size(1) < self.audio_time:
-            pad_amount = self.audio_time - audio.size(1)
-            # Fill with zeros along the time axis
-            audio = F.pad(audio, (0, 0, 0, pad_amount), "constant", 0)
-        else:
-            audio = audio[:, :self.audio_time, :]
+        processed_tensors_management(self.files)
 
-        # Emotion
-        emotion_file = os.path.join(self.emotion_dir, file + ".txt")
-        with open(emotion_file, "r") as f:
-            emotion = f.read()
-        # Convert the emotion to an integer (0-9)
-        emotion = int(emotion)
+        for file in self.files:
+            path: str = DATA_PATH + "/" + "Processed_tensors" + "/" + file
+            # Text
+            text_file = os.path.join(self.text_dir, file + ".txt")
+            with open(text_file, "r") as f:
+                text = f.read()
+            text_tensor = self.bert(text).type(torch.double)
+            torch.save(text_tensor, path + "/" + "text.pt")
 
-        return audio.type(torch.double), text_tensor.type(torch.long), torch.tensor(emotion, dtype=torch.long)
+            # Audio
+            audio_file = os.path.join(self.audio_dir, file + ".wav")
+            # Transform the audio file to a spectrogram
+            spectrogram = audio2spectrogram(audio_file)
+            spectrogram = get_3d_spec(spectrogram)
+            # Transpose to match PyTorch's format (F, T, C)
+            npimg = np.transpose(spectrogram, (1, 0, 2))
+            # Convert to tensor
+            audio: torch.Tensor = torch.tensor(npimg)
+            # Pad and cut to maximum length
+            if audio.size(1) < self.audio_time:
+                pad_amount = self.audio_time - audio.size(1)
+                # Fill with zeros along the time axis
+                audio = F.pad(audio, (0, 0, 0, pad_amount), "constant", 0).type(torch.double)
+            else:
+                audio = audio[:, :self.audio_time, :].type(torch.double)
+            torch.save(audio, path + "/" + "audio.pt")
+
+            # Emotion
+            emotion_file = os.path.join(self.emotion_dir, file + ".txt")
+            with open(emotion_file, "r") as f:
+                emotion = f.read()
+            # Convert the emotion to an integer (0-9)
+            emotion = torch.tensor(int(emotion), dtype=torch.long)
+            torch.save(emotion, path + "/" + "emotion.pt")
+
 
 
 def log_specgram(audio: np.array, sample_rate: int, window_size: int = 20,

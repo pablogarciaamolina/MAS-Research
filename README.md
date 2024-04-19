@@ -12,12 +12,7 @@ Finally, be aware this research is conditioned by time as well as computational 
 |-- MSA-Research
 |   |-- data
 |   |   |-- IEMOCAP
-|   |   |   |-- Audio
-|   |   |   |-- Emotion
-|   |   |   |-- Not_Sorted_Audio
-|   |   |   |-- Not_Sorted_Emotion
-|   |   |   |-- Not_Sorted_Text
-|   |   |   |-- Text
+|   |   |   |-- ...
 |   |-- docs
 |   |   |-- MSA_Project_Proposal.pdf
 |   |   |-- MSA_Project_Report.pdf
@@ -31,8 +26,6 @@ Finally, be aware this research is conditioned by time as well as computational 
 |   |   |-- text
 |   |   |   |-- __init__.py
 |   |   |   |-- bertEmbedding.py
-|   |   |   |-- myBERT.py
-|   |   |   |-- pretrainedBERT.py
 |   |   |-- audio_and_text.py
 |   |   |-- __init__.py
 |   |-- src
