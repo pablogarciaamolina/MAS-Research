@@ -6,9 +6,6 @@ Multi-Modal Sentiment Analysis Research
 
 ```
 |-- MSA-Research
-|   |-- .gitignore
-|   |-- README.md
-|   |-- README.md
 |   |-- data
 |   |   |-- IEMOCAP
 |   |   |   |-- Audio
@@ -17,6 +14,9 @@ Multi-Modal Sentiment Analysis Research
 |   |   |   |-- Not_Sorted_Emotion
 |   |   |   |-- Not_Sorted_Text
 |   |   |   |-- Text
+|   |-- docs
+|   |   |-- MSA_Project_Proposal.pdf
+|   |   |-- MSA_Project_Report.pdf
 |   |-- models
 |   |   |-- audio
 |   |   |   |-- __init__.py
@@ -43,7 +43,6 @@ Multi-Modal Sentiment Analysis Research
 |   |   |   |-- __init__.py
 |   |   |-- __init__.py
 |   |   |-- utils.py
-|   |-- docs
-|   |   |-- MSA_Project_Proposal.pdf
-|   |   |-- MSA_Project_Report.pdf
+|   |-- .gitignore
+|   |-- README.md
 ```
