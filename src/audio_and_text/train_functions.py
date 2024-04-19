@@ -49,14 +49,14 @@ def train_step(
     model.train()
 
     # TODO
-    for spectrograms, tokens, targets in train_data:
+    for spectrograms, embedding, targets in train_data:
         # Pass data and labels to the correct device
         spectrograms = spectrograms.to(device)
-        tokens = tokens.to(device)
+        embedding = embedding.to(device)
         targets = targets.to(device)
 
         # Fordward pass
-        outputs = model(spectrograms, tokens)
+        outputs = model(spectrograms, embedding)
         loss_value = loss(outputs, targets)
 
         # METRICS
@@ -116,16 +116,16 @@ def val_step(
     model.eval()
 
     # TODO
-    for spectrograms, tokens, targets in val_data:
+    for spectrograms, embedding, targets in val_data:
         
         with torch.no_grad():
             # Pass data and labels to the correct device
             spectrograms = spectrograms.to(device)
-            tokens = tokens.to(device)
+            embedding = embedding.to(device)
             targets = targets.to(device)
 
             # Forward pass
-            outputs = model(spectrograms, tokens)
+            outputs = model(spectrograms, embedding)
             loss_value = loss(outputs, targets)
 
         # METRICS
@@ -169,16 +169,16 @@ def test_step(
     # Start eval mode
     model.eval()
 
-    for spectrograms, tokens, targets in test_data:
+    for spectrograms, embedding, targets in test_data:
         
         with torch.no_grad():
             # Pass data and labels to the correct device
             spectrograms = spectrograms.to(device)
-            tokens = tokens.to(device)
+            embedding = embedding.to(device)
             targets = targets.to(device)
 
             # Forward pass
-            outputs = model(spectrograms, tokens)
+            outputs = model(spectrograms, embedding)
 
         # METRICS
         # Save accuracy metric

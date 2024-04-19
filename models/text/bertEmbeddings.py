@@ -1,48 +1,36 @@
 import torch
 import torch.nn as nn
-from transformers import BertModel
+from transformers import BertModel, BertTokenizer
 
 class BertEmbeddings(nn.Module):
     
-    def __init__(self, seq_dim: int, out_dim: int):
+    def __init__(self):
         super(BertEmbeddings, self).__init__()
         """
         Constructor of the BertEmbeddings class.
-
-        Args:
-            out_dim: output embedding dimension
         """
-        self.bert = BertModel.from_pretrained('bert-base-uncased')
-        pre_emb_dim: int = self.bert.config.hidden_size
 
-        # Add FC layer
-        self.transform = torch.nn.Sequential(
-            torch.nn.Flatten(start_dim=1),
-            torch.nn.Linear(in_features=seq_dim*pre_emb_dim, out_features=out_dim),
-        )
-        
-    """ def get_embeddings(self, text):
-        tokens = self.tokenizer(text, return_tensors='pt', padding=True, truncation=True)
-        with torch.no_grad():
-            outputs = self.bert(**tokens)
-            embeddings = outputs.last_hidden_state  # Última capa oculta de BERT
-        
-        return embeddings"""
+        # Method to tokenize text
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
+
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
+        # pre_emb_dim: int = self.bert.config.hidden_size
     
-        
-    
-    def forward(self, tokens):
+    def forward(self, inputs):
         """
         Forward pass of the model.
         
         Args:
-            text: str, the input text.
+            inputs: str, the input text.
         """
+
+        tokens = self.tokenizer(inputs, return_tensors='pt',padding=True,truncation=True)
+        text_tensor = torch.tensor(self.tokenizer.convert_tokens_to_ids(tokens))
+
         # Obtener los embeddings de la oración
-        embeddings = self.get_embeddings_(tokens)
-        processed_embedding = self.transform(embeddings)
+        embeddings = self.bert.get_input_embeddings()(text_tensor)
         
-        return processed_embedding
+        return embeddings
     
 
 

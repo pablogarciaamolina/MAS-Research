@@ -1,6 +1,5 @@
 import torch
 from .audio import AlexNet_Based_FCN, Audio_Attention
-from .text import PretrainedBERT, BertEmbeddings
 
 class Audio_Text_MSA_Model(torch.nn.Module):
     """
@@ -30,7 +29,8 @@ class Audio_Text_MSA_Model(torch.nn.Module):
             f_t_c: tuple[int],
             num_classes: int,
             seq_dim: int,
-            embedding_dim: int = 1000,
+            embedding_dim: int,
+            out_text_dim: int = 1000,
             C: int = 256,
             lrn_mode: str = "full", 
             lambd: float = 0.3, 
@@ -43,8 +43,9 @@ class Audio_Text_MSA_Model(torch.nn.Module):
             f_t_c: dimensions of the spectrogram, where f is the in frequency, t is the in time, and c in the in channels
             num_classes: number of classes for clasification.
             seq_dim: size of text sequence
-            
             embedding_dim: dimension of text embedding
+
+            out_text_dim: final embedding dimension of text processing
             C: size of channelsin spectrogram representation of the audio. Defaults to 256.
             lrn_mode: mode for the LRN in the AlexNet for audio processing, number of neighbouring channels to use. Sets
             to 'full', 'half' or 'single'. Defaults to FULL
@@ -67,12 +68,15 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         )
 
         # TEXT ONLY
-        self.bert = BertEmbeddings(seq_dim=seq_dim, out_dim=embedding_dim)
+        self.transform = torch.nn.Sequential(
+            torch.nn.Flatten(start_dim=1),
+            torch.nn.Linear(in_features=seq_dim*embedding_dim, out_features=out_text_dim),
+        )
 
         # AUDIO AND TEXT
         self.clasificator = torch.nn.Sequential(
             torch.nn.Dropout(dropout),
-            torch.nn.Linear(C+self.hidden_size, num_classes)
+            torch.nn.Linear(C+out_text_dim, num_classes)
         )
 
     def forward(self,
@@ -96,7 +100,7 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         # out_audio = self.audio_linear(out_alexnet)
 
         # TEXT ONLY
-        out_text = self.bert(text_inputs) # ?
+        out_text = self.transform(text_inputs)
 
         # AUDIO AND TEXT
         fusioned_features: torch.Tensor = torch.concat([out_audio, out_text], dim=1) # ?
