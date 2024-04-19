@@ -39,6 +39,9 @@ Finally, be aware this research is conditioned by time as well as computational 
 |   |   |   |   |-- __init__.py
 |   |   |   |   |-- data.py
 |   |   |   |   |-- file_management.py
+|   |   |   |-- SentiCap
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- data.py
 |   |   |   |-- __init__.py
 |   |   |-- __init__.py
 |   |   |-- utils.py
