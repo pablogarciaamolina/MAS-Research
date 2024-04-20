@@ -78,17 +78,20 @@ def load_data(batch_size: int = 1, shuffle: bool = False,
     '''
     # Download data if data/SentiCap is empty
     data_dir = "data/SentiCap"
-    if os.path.exists(data_dir) and os.path.isdir(data_dir):
-        if not os.listdir(data_dir):
-            os.chdir('./credentials')
-            dataset = "https://www.kaggle.com/datasets/prathamsaraf1389/senticap"
-            # Move the data to the designated directory and rename it 
-            od.download(dataset)
-            os.chdir('../')
-            os.replace('credentials/senticap/senticap.csv', 'data/SentiCap/senticap.csv')
-            shutil.move('credentials/senticap/senticap_images', 'data/SentiCap/senticap_images')
-            os.rename('data/SentiCap/senticap_images', 'data/SentiCap/Images')
-            shutil.rmtree('credentials/senticap')
+    
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir)
+
+    if not os.listdir(data_dir):
+        os.chdir('./credentials')
+        dataset = "https://www.kaggle.com/datasets/prathamsaraf1389/senticap"
+        # Move the data to the designated directory and rename it 
+        od.download(dataset)
+        os.chdir('../')
+        os.replace('credentials/senticap/senticap.csv', 'data/SentiCap/senticap.csv')
+        shutil.move('credentials/senticap/senticap_images', 'data/SentiCap/senticap_images')
+        os.rename('data/SentiCap/senticap_images', 'data/SentiCap/Images')
+        shutil.rmtree('credentials/senticap')
 
     # Create each Dataset
     train_dataset = SentiCap_Dataset(DATA_PATH, 'train')

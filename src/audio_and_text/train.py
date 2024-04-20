@@ -44,15 +44,15 @@ def main() -> None:
     C: int = 256
     lrn_mode: str = "full"
     lambd: float = 0.3
-    time_dim: int = 1500
-    out_text_dim = 1000
+    time_dim: int = 750
+    out_text_dim = 750
 
     # Scheduler
     weight_decay = 0.01
     max_iter = ...
     lr_min = ...
     gamma = 0.1
-    milestones: list[int] = [15, 30, 60]
+    milestones: list[int] = [15, 30, 40]
     # -----------------------
 
     # -------LOADING---------
