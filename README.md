@@ -83,11 +83,11 @@ The text input is passed already tokenized and then embedded using a pretrained 
 For featur fusion we simply concatenate both outputs of the individual processing modules, obtaining a tensor shaped `[batch, C + text embedding dim]`. This is then  passed to a FC layer (with dropout) that act as the classifier.
 
 
-![Audio-and-Text-Model image](./images/Audio-and-Text-Model_image.png)
+![Audio-and-Text-Model image](./images/AAT_Model_image.png)
 
 ### Output Transformer Encoder Model (OTE)
 
-This model uses image and text extracted from the SentiCap dataset.
+Output Transform Encoder Model for Multimodal Sentimen Analysis, described by Zheng Yixiao (https://github.com/YeexiaoZheng/Multimodal-Sentiment-Analysis?tab=readme-ov-file). This model uses image and text extracted from the SentiCap dataset.
 
 **Image processing**
 
@@ -100,3 +100,5 @@ As well as in the AAT model, the text input is passed already tokenized and then
 **Image and Text processing**
 
 The concatenation of the output of both image and text individual processing modules is passed into an attention layer represented by a Transformer Encoder. After that, we are left with an output tensor of shape `[batch, image output dim + text output dim]` (equal to the input dimensions), which is passed through a final classifier module composed of a FC layer. Finally, the output will be a tensor of shape `[batch, num classes]` containing the logits for each class.
+
+![Audio-and-Text-Model image](./images/OTE_Model_image.png)
