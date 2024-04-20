@@ -13,6 +13,8 @@ Finally, be aware this research is conditioned by time as well as computational 
 |   |-- data
 |   |   |-- IEMOCAP
 |   |   |   |-- ...
+|   |   |-- SentiCap
+|   |   |   |-- ... 
 |   |-- docs
 |   |   |-- MSA_Project_Proposal.pdf
 |   |   |-- MSA_Project_Report.pdf
@@ -23,13 +25,22 @@ Finally, be aware this research is conditioned by time as well as computational 
 |   |   |   |-- __init__.py
 |   |   |   |-- attention.py
 |   |   |   |-- cnn.py
+|   |   |-- image
+|   |   |   |-- __init__.py
+|   |   |   |-- resnet.py
 |   |   |-- text
 |   |   |   |-- __init__.py
 |   |   |   |-- bertEmbedding.py
-|   |   |-- audio_and_text.py
 |   |   |-- __init__.py
+|   |   |-- AAT_model.py
+|   |   |-- OTE_model.py
 |   |-- src
-|   |   |-- audio_and_text
+|   |   |-- AAT
+|   |   |   |-- __init__.py
+|   |   |   |-- evaluate.py
+|   |   |   |-- train.py
+|   |   |   |-- train_functions.py
+|   |   |-- OTE
 |   |   |   |-- __init__.py
 |   |   |   |-- evaluate.py
 |   |   |   |-- train.py
@@ -51,7 +62,7 @@ Finally, be aware this research is conditioned by time as well as computational 
 
 ## Models
 
-### Audio-and-Text Model
+### Audio-and-Text Model (AAT)
 
 This model only uses audio and text input. It takes the data from the IEMOCAP dataset.
 
@@ -65,7 +76,7 @@ This attention layer can be substitued by a FC layer.
 
 **Text processing**
 
-The text input is passed already tokenized and then embedded using a pretrained BERT model. After that, were a left with a tensor `[batch, sequence size, embedding dim]` which has its last two dimensions squeezed and passed through a FC layer a transoformed into `[batch, text embedding size]`.
+The text input is passed already tokenized and then embedded using a pretrained BERT model. After that, were a left with a tensor `[batch, sequence size, embedding dim]` which has its last two dimensions squeezed and passed through a FC layer a transformed into `[batch, text embedding size]`.
 
 **Audio and Text processing**
 
@@ -74,3 +85,18 @@ For featur fusion we simply concatenate both outputs of the individual processin
 
 ![Audio-and-Text-Model image](./images/Audio-and-Text-Model_image.png)
 
+### Output Transformer Encoder Model (OTE)
+
+This model uses image and text extracted from the SentiCap dataset.
+
+**Image processing**
+
+The image input is a tensor of shape `[batch, in channels, h, w]`. It passes through a ResNet-50 module and is converted into `[batch, image output dim]`
+
+**Text processing**
+
+As well as in the AAT model, the text input is passed already tokenized and then embedded using a pretrained BERT model. After that, were a left with a tensor `[batch, sequence size, embedding dim]` which has its last two dimensions squeezed and passed through a FC layer a transformed into `[batch, text output dim]`.
+
+**Image and Text processing**
+
+The concatenation of the output of both image and text individual processing modules is passed into an attention layer represented by a Transformer Encoder. After that, we are left with an output tensor of shape `[batch, image output dim + text output dim]` (equal to the input dimensions), which is passed through a final classifier module composed of a FC layer. Finally, the output will be a tensor of shape `[batch, num classes]` containing the logits for each class.
