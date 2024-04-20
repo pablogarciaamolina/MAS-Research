@@ -3,9 +3,12 @@ import shutil
 import pandas as pd
 import opendatasets as od
 
+import torch
 from PIL import Image
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
+
+from models.text import BertEmbeddings
 
 DATA_PATH = "data/SentiCap"
 
@@ -34,28 +37,36 @@ class SentiCap_Dataset(Dataset):
         # Redefine the data of column tokens so it is recognized as a list
         self.info_df["tokens"] = self.info_df["tokens"].fillna("[]").apply(lambda x: eval(x))
 
+        # Embedding for the text
+        self.embedding = BertEmbeddings()
+
+
     def __len__(self):
         return len(self.info_df)
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # Get image name
         image_name = self.info_df["filename"][idx]
         # Get text tokens
-        txt_tokens = self.info_df["tokens"][idx]
+        # txt_tokens = self.info_df["tokens"][idx]
+        # Get text
+        text_raw = self.info_df["raw"][idx]
         # Get label
         label = self.info_df["sentiment"][idx]
         # Transform the image to a torch.tensor
         transform = transforms.ToTensor()
-        img_tensor = transform(Image.open(self.image_dir + image_name))
+        img_tensor = transform(Image.open(self.image_dir + image_name)).type(torch.double)
+        # Transform text into embedding
+        txt_embedded = self.embedding(text_raw).type(torch.double)
 
-        return img_tensor, txt_tokens, int(label)
+        return img_tensor, txt_embedded, torch.tensor(int(label), dtype=torch.long)
 
 
 def load_data(batch_size: int = 1, shuffle: bool = False,
               num_workers: int = 0) ->\
                   tuple[DataLoader, DataLoader, DataLoader]:
 
-    '''Loads the data from the IEMOCAP dataset, creating
+    '''Loads the data from the SentiCap dataset, creating
     the training, validation, and testing dataloaders.
 
     Parameters
