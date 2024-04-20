@@ -27,7 +27,7 @@ class SentiCap_Dataset(Dataset):
         as it is a known dataste it is divided in train , 
         test and val.
     '''
-    def __init__(self, data_path: str, split: str):
+    def __init__(self, data_path: str, split: str, images_size: tuple[int, int]=(640, 470)):
         # Path in which the images are stored
         self.image_dir = os.path.join(data_path,"Images")
         # Take the dataframe with the info of the files
@@ -39,6 +39,13 @@ class SentiCap_Dataset(Dataset):
 
         # Embedding for the text
         self.embedding = BertEmbeddings()
+
+        # Transformation for images
+        h, w = images_size
+        self.image_transformations = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize((h, w))
+        ])
 
 
     def __len__(self):
@@ -54,8 +61,7 @@ class SentiCap_Dataset(Dataset):
         # Get label
         label = self.info_df["sentiment"][idx]
         # Transform the image to a torch.tensor
-        transform = transforms.ToTensor()
-        img_tensor = transform(Image.open(self.image_dir + image_name)).type(torch.double)
+        img_tensor = self.image_transformations(Image.open(self.image_dir + "/" + image_name)).type(torch.double)
         # Transform text into embedding
         txt_embedded = self.embedding(text_raw).type(torch.double)
 

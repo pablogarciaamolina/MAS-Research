@@ -44,7 +44,7 @@ def main() -> None:
     image_out_dim = 64
     text_out_dim= 64
     classification_hidden_size= 128
-    attention_heads= 7
+    attention_heads= 8 # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
 
     # Scheduler
     weight_decay = 0.01
