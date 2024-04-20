@@ -16,9 +16,8 @@ class OTE_Model(torch.Module):
         - This is further processed by a module that flattens that input and passes it through a FC to obtain something of shape `[batch, text ouput dim]` 
 
     IMAGE AND TEXT:
-        - Both image and text outputs are passed into an attention layer represented by a Transformer Encoder. 
-        ...
-        - After that, we are left with a tensor of shape `[??]`, which is passed through a final classifier module composed of a FC layer and a SoftMax layer. Note the SoftMax transformation is done when calculating the loss (Cross Entropy Loss).
+        - Both image and text outputs are passed into an attention layer represented by a Transformer Encoder. This transformer layer recieves as input the concatenation of the output of both image and text individual processing modules. 
+        - After that, we are left with a tensor of shape `[batch, image output dim + text output dim]`, which is passed through a final classifier module composed of a FC layer and a SoftMax layer. Note the SoftMax transformation is done when calculating the loss (Cross Entropy Loss).
         - Final output will be a tensor of shape `[batch, num classes]` containing the logits for each class. 
     """
 
