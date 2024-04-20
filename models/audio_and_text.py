@@ -6,7 +6,7 @@ class Audio_Text_MSA_Model(torch.nn.Module):
     Implementation of multimodal approach on emotion recognition using audio and text.
     Model described in "Audio-and-text-based-emotion-recognition" https://github.com/aris-ai/Audio-and-text-based-emotion-recognition/tree/master.
 
-    By our interpretation that consist on the following modules:
+    By our interpretation, that consist on the following modules:
 
     AUDIO ONLY:
         - Processing of audiofiles contained in de IMEOCAP dataset with conversion to spectrogram (used as input data)
