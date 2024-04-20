@@ -72,7 +72,7 @@ class ResidualBlock(torch.nn.Module):
         return self.activation(y1 + y2)
     
 
-class BottleneckBlock(torch.Module):
+class BottleneckBlock(torch.nn.Module):
     """
     Deeper ResNet architectures implement a block with 3 convolutional layers instead of 2, this are the BottleNeck blocks.
 

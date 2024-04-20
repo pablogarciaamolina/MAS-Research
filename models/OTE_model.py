@@ -1,7 +1,7 @@
 import torch
-from image import ResNet50
+from .image import ResNet50
 
-class OTE_Model(torch.Module):
+class OTE_Model(torch.nn.Module):
     """
     Output Transform Encoder Model for Multimodal Sentimen Analysis, described by Zheng Yixiao in https://github.com/YeexiaoZheng/Multimodal-Sentiment-Analysis?tab=readme-ov-file
 
