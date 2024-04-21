@@ -32,7 +32,8 @@ class OTE_Model(torch.nn.Module):
             dropout: float = 0.4,
             num_heads: int = 4,
             attention_dropout: float = 0.1,
-            use_small_cnn: bool = False
+            use_small_cnn: bool = False,
+            dim_feed_forward: int = 2048
         ) -> None:
         """
         Class constructor.
@@ -50,6 +51,7 @@ class OTE_Model(torch.nn.Module):
             num_heads: the number of heads in the multihead attention of the Transformer Encoder layer.
             attention_dropout: dropout probability specifically for the Transformer Encoder layer
             use_small_cnn: determines whether to use a smaller CNN instead of the expected ResNet-50 for the image processing. Defaults to False.
+            dim_feed_forward: dimension of the feedforward network model in the Transformer Encoder layer. Defaults to 2048.
         """
 
         super().__init__()
@@ -87,7 +89,8 @@ class OTE_Model(torch.nn.Module):
         self.transformer = torch.nn.TransformerEncoderLayer(
             d_model=image_out_dim + text_out_dim,
             nhead=num_heads,
-            dropout=attention_dropout
+            dropout=attention_dropout,
+            dim_feedforward=dim_feed_forward
         )
         self.classifier = torch.nn.Sequential(
             torch.nn.Dropout(dropout),
