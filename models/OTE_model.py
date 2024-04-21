@@ -54,7 +54,7 @@ class OTE_Model(torch.nn.Module):
 
         # IMAGE ONLY
         # self.resnet50 = ResNet50(in_channels=image_in_channels, out_dim=image_out_dim)
-        self.resnet50 = ResNet18(in_channels=image_in_channels, num_classes=image_out_dim)
+        self.resnet18 = ResNet18(in_channels=image_in_channels, num_classes=image_out_dim)
 
         # TEXT ONLY
         self.embedding_transform = torch.nn.Sequential(
@@ -90,7 +90,8 @@ class OTE_Model(torch.nn.Module):
         """
 
         # IMAGE ONLY
-        processed_images: torch.Tensor = self.resnet50(image_inputs) # [batch, image_out_dim]
+        # processed_images: torch.Tensor = self.resnet50(image_inputs) # [batch, image_out_dim]
+        processed_images: torch.Tensor = self.resnet18(image_inputs) # [batch, image_out_dim]
 
         # TEXT ONLY
         processed_text: torch.Tensor = self.embedding_transform(text_inputs) # [batch, text_out_dim]
