@@ -34,12 +34,16 @@ class SentiCap_Dataset(Dataset):
         self.split = split
         # Path in which the images are stored
         self.image_dir = os.path.join(data_path,"Images")
+        # Get the img_filenames
+        self.images_names = os.listdir(self.image_dir)
         # Take the dataframe with the info of the files
         self.info_df = pd.read_csv(data_path + "/senticap.csv")
         # Select only the relevant datat for each split
         self.info_df = self.info_df[self.info_df["split"].str.contains(split)]
         # Redefine the data of column tokens so it is recognized as a list
         self.info_df["tokens"] = self.info_df["tokens"].fillna("[]").apply(lambda x: eval(x))
+        # Select only the data that we have
+        self.info_df = self.info_df[self.info_df["filename"].isin(self.images_names)]
         # Reset the indexes
         self.info_df = self.info_df.reset_index()
         # Reduce the amount of data
@@ -54,7 +58,7 @@ class SentiCap_Dataset(Dataset):
         ])
         
         # Process data
-        self._save_images_and_embeddings()
+        # self._save_images_and_embeddings()
 
 
     def __len__(self):
@@ -69,7 +73,7 @@ class SentiCap_Dataset(Dataset):
         image: torch.Tensor = torch.load(path + "/" + "image.pt")
         sentiment: torch.Tensor = torch.load(path + "/" + "sentiment.pt")
 
-        return text, image, sentiment
+        return image, text, sentiment
     
     def _save_images_and_embeddings(self) -> None:
         
@@ -81,7 +85,7 @@ class SentiCap_Dataset(Dataset):
             file = self.split + f"_{i}"
             path: str = DATA_PATH + "/" + "Processed_tensors" + "/" + file
             # Text
-            text_tensor = self.bert(self.info_df["raw"][i]).type(torch.double)
+            text_tensor = self.embedding(self.info_df["raw"][i]).type(torch.double)
             torch.save(text_tensor, path + "/" + "text.pt")
             # Image
             image_name = self.info_df["filename"][i]

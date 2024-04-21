@@ -1,7 +1,6 @@
 import os
-import shutil
 
-DATA_PATH = "data/IEMOCAP"
+DATA_PATH = "data/SentiCap"
 
 def processed_tensors_management(list_dirs: list[str]) -> None:
 
