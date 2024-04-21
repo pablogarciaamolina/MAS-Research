@@ -66,7 +66,7 @@ Finally, be aware this research is conditioned by time as well as computational 
 
 This model only uses audio and text input. It takes the data from the IEMOCAP dataset.
 
-**Audio processing**
+#### Audio processing
 
 Audio input is passed as a 3D spectrogram representation, with shape `[batch size, f, t, c]` where f is the frequency dimension, t the time dimension and c the channel.
 
@@ -74,11 +74,11 @@ Then is processed by a FCN version of AlexNet into a tensor of shape `[batc, F, 
 
 This attention layer can be substitued by a FC layer.
 
-**Text processing**
+#### Text processing
 
 The text input is passed already tokenized and then embedded using a pretrained BERT model. After that, were a left with a tensor `[batch, sequence size, embedding dim]` which has its last two dimensions squeezed and passed through a FC layer a transformed into `[batch, text embedding size]`.
 
-**Audio and Text processing**
+#### Audio and Text processing
 
 For featur fusion we simply concatenate both outputs of the individual processing modules, obtaining a tensor shaped `[batch, C + text embedding dim]`. This is then  passed to a FC layer (with dropout) that act as the classifier.
 
@@ -89,18 +89,58 @@ For featur fusion we simply concatenate both outputs of the individual processin
 
 Output Transform Encoder Model for Multimodal Sentimen Analysis, described by Zheng Yixiao (https://github.com/YeexiaoZheng/Multimodal-Sentiment-Analysis?tab=readme-ov-file). This model uses image and text extracted from the SentiCap dataset.
 
-**Image processing**
+#### Image processing
 
 The image input is a tensor of shape `[batch, in channels, h, w]`. It passes through a ResNet-50 module and is converted into `[batch, image output dim]`. We also added the possibility for the model to replace the ResNet-50 by a simple CNN in case the data or the computational resources are scarce.
 
-**Text processing**
+#### Text processing
 
 As well as in the AAT model, the text input is passed already tokenized and then embedded using a pretrained BERT model. After that, were a left with a tensor `[batch, sequence size, embedding dim]` which has its last two dimensions squeezed and passed through a FC layer a transformed into `[batch, text output dim]`.
 
 Also, we added the possibility to use a word2vec embedding loaded from memory that is lighter than the BERT embedding, in case of scarse resources.
 
-**Image and Text processing**
+#### Image and Text processing
 
 The concatenation of the output of both image and text individual processing modules is passed into an attention layer represented by a Transformer Encoder. After that, we are left with an output tensor of shape `[batch, image output dim + text output dim]` (equal to the input dimensions), which is passed through a final classifier module composed of a FC layer. Finally, the output will be a tensor of shape `[batch, num classes]` containing the logits for each class.
 
 ![Audio-and-Text-Model image](./images/OTE_Model_image.png)
+
+## Datasets
+
+### IEMOCAP
+
+We use IEMOCAP as a source of audio and text data.
+...
+
+### SentiCap
+
+
+## Requirements
+
+chardet==4.0.0
+numpy==1.22.2
+Pillow==9.2.0
+scikit_learn==1.1.1
+torch==1.8.2
+torchvision==0.9.2
+tqdm==4.63.0
+transformers==4.18.0
+
+```shell
+pip install -r requirements.txt
+```
+
+## Train
+
+All the results from training will be stored in a folder named `trained_models`
+
+#### Audio-and-Text Model
+
+```shell
+python -m src.AAT.train
+```
+
+#### Output Transform Encoder Model
+```shell
+python -m src.OTE.train
+```
