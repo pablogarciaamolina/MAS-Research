@@ -8,6 +8,7 @@ from PIL import Image
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 
+from .file_management import processed_tensors_management
 from models.text import BertEmbeddings
 
 DATA_PATH = "data/SentiCap"
@@ -28,6 +29,9 @@ class SentiCap_Dataset(Dataset):
         test and val.
     '''
     def __init__(self, data_path: str, split: str, images_size: tuple[int, int]=(640, 470)):
+
+        # Save split
+        self.split = split
         # Path in which the images are stored
         self.image_dir = os.path.join(data_path,"Images")
         # Take the dataframe with the info of the files
@@ -36,36 +40,59 @@ class SentiCap_Dataset(Dataset):
         self.info_df = self.info_df[self.info_df["split"].str.contains(split)]
         # Redefine the data of column tokens so it is recognized as a list
         self.info_df["tokens"] = self.info_df["tokens"].fillna("[]").apply(lambda x: eval(x))
-
+        # Reset the indexes
+        self.info_df = self.info_df.reset_index()
+        # Reduce the amount of data
+        self.info_df = self.info_df[:int(len(self.info_df)*0.5)]
         # Embedding for the text
         self.embedding = BertEmbeddings()
-
         # Transformation for images
         h, w = images_size
         self.image_transformations = transforms.Compose([
             transforms.ToTensor(),
             transforms.Resize((h, w))
         ])
+        
+        # Process data
+        self._save_images_and_embeddings()
 
 
     def __len__(self):
         return len(self.info_df)
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        # Get image name
-        image_name = self.info_df["filename"].values[idx]
-        # Get text tokens
-        # txt_tokens = self.info_df["tokens"][idx]
-        # Get text
-        text_raw = self.info_df["raw"].values[idx]
-        # Get label
-        label = self.info_df["sentiment"].values[idx]
-        # Transform the image to a torch.tensor
-        img_tensor = self.image_transformations(Image.open(self.image_dir + "/" + image_name)).type(torch.double)
-        # Transform text into embedding
-        txt_embedded = self.embedding(text_raw).type(torch.double)
+        file = self.split + f"_{idx}"
 
-        return img_tensor, txt_embedded, torch.tensor(label, dtype=torch.long)
+        path = DATA_PATH + "/" + "Processed_tensors" + "/" + file
+
+        text: torch.Tensor = torch.load(path + "/" + "text.pt")
+        image: torch.Tensor = torch.load(path + "/" + "image.pt")
+        sentiment: torch.Tensor = torch.load(path + "/" + "sentiment.pt")
+
+        return text, image, sentiment
+    
+    def _save_images_and_embeddings(self) -> None:
+        
+        list_dir = [self.split + f"_{i}" for i in range(len(self.info_df))]
+
+        processed_tensors_management(list_dir)
+
+        for i in range(len(self.info_df)):
+            file = self.split + f"_{i}"
+            path: str = DATA_PATH + "/" + "Processed_tensors" + "/" + file
+            # Text
+            text_tensor = self.bert(self.info_df["raw"][i]).type(torch.double)
+            torch.save(text_tensor, path + "/" + "text.pt")
+            # Image
+            image_name = self.info_df["filename"][i]
+            img = self.image_transformations(Image.open(self.image_dir + "/" + image_name)).type(torch.double)
+            torch.save(img, path + "/" + "image.pt")
+            # Sentiment
+            emotion = torch.tensor(int(self.info_df["sentiment"][i]), dtype=torch.long)
+            torch.save(emotion, path + "/" + "sentiment.pt")
+
+
+
 
 
 def load_data(batch_size: int = 1, shuffle: bool = False,
