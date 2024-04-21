@@ -28,7 +28,7 @@ class SentiCap_Dataset(Dataset):
         as it is a known dataste it is divided in train , 
         test and val.
     '''
-    def __init__(self, data_path: str, split: str, images_size: tuple[int, int]=(640, 470)):
+    def __init__(self, data_path: str, split: str, images_size: tuple[int, int]=(64, 64)):
 
         # Save split
         self.split = split
@@ -47,7 +47,7 @@ class SentiCap_Dataset(Dataset):
         # Reset the indexes
         self.info_df = self.info_df.reset_index()
         # Reduce the amount of data
-        self.info_df = self.info_df[:int(len(self.info_df)*0.5)]
+        self.info_df = self.info_df[:int(len(self.info_df)*0.25)]
         # Embedding for the text
         self.embedding = BertEmbeddings()
         # Transformation for images
@@ -58,7 +58,7 @@ class SentiCap_Dataset(Dataset):
         ])
         
         # Process data
-        # self._save_images_and_embeddings()
+        self._save_images_and_embeddings()
 
 
     def __len__(self):

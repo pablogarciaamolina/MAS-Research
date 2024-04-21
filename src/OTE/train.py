@@ -41,12 +41,12 @@ def main() -> None:
     # ----HYPERPARAMETERS----
     epochs: int = 100
     lr: float = 0.001
-    batch_size: int = 40
+    batch_size: int = 26
     dropout: float = 0.4
     image_out_dim = 64
     text_out_dim= 64
-    classification_hidden_size= 128
-    attention_heads= 8 # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
+    classification_hidden_size= 70
+    attention_heads= 4 # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
     use_small_cnn: bool = True
     dim_feed_forward=1024
 
