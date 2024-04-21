@@ -41,15 +41,15 @@ def main() -> None:
     # ----HYPERPARAMETERS----
     epochs: int = 100
     lr: float = 0.001
-    batch_size: int = 26
+    batch_size: int = 64
     dropout: float = 0.4
     image_out_dim = 64
     text_out_dim= 64
-    classification_hidden_size= 70
+    classification_hidden_size= 128
     attention_heads= 4 # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
     use_small_cnn: bool = True
-    dim_feed_forward = 1024
-    use_word2vec = True
+    dim_feed_forward = 2048
+    use_word2vec = False
     text_sequence_max_length = 30
 
     # Scheduler
