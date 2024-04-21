@@ -8,6 +8,8 @@ from tqdm.auto import tqdm
 from typing import Final
 import signal
 import time
+import warnings
+warnings.filterwarnings("ignore")
 
 # own modules
 from src.utils import (
@@ -39,7 +41,7 @@ def main() -> None:
     # ----HYPERPARAMETERS----
     epochs: int = 100
     lr: float = 0.001
-    batch_size: int = 64
+    batch_size: int = 1
     dropout: float = 0.4
     image_out_dim = 64
     text_out_dim= 64
@@ -77,7 +79,7 @@ def main() -> None:
         text_embedding_dim=text_inputs.shape[2],
         text_out_dim=text_out_dim,
         classifier_hidden_size=classification_hidden_size,
-        num_classes=10,
+        num_classes=2,
         dropout=dropout,
         num_heads=attention_heads,
     ).to(device)

@@ -65,7 +65,7 @@ class SentiCap_Dataset(Dataset):
         # Transform text into embedding
         txt_embedded = self.embedding(text_raw).type(torch.double)
 
-        return img_tensor, txt_embedded, torch.tensor(int(label), dtype=torch.long)
+        return img_tensor, txt_embedded, torch.tensor(label, dtype=torch.long)
 
 
 def load_data(batch_size: int = 1, shuffle: bool = False,

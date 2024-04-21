@@ -79,7 +79,7 @@ class BottleneckBlock(torch.nn.Module):
     Defined in "Deep Residual Learning for Image Recognition" (https://arxiv.org/pdf/1512.03385.pdf)
     """
 
-    def __init__(self, in_channels: int, out_channels: int, strides: int = 1) -> None:
+    def __init__(self, in_channels: int, out_channels: int, strides: int = 1, dtype: torch.AnyType = torch.double) -> None:
         """
         Constructor of the Bottleneck Block class. It is composed of two branches.
 
@@ -103,19 +103,19 @@ class BottleneckBlock(torch.nn.Module):
 
         self.conv_branch = torch.nn.Sequential(
             torch.nn.Conv2d(
-                in_channels, out_channels, kernel_size=(1, 1), padding=1, stride=strides
+                in_channels, out_channels, kernel_size=(1, 1), stride=strides
             ),
-            torch.nn.BatchNorm2d(out_channels),
+            torch.nn.BatchNorm2d(out_channels, dtype=dtype),
             torch.nn.ReLU(),
 
             torch.nn.Conv2d(
-                out_channels, out_channels, kernel_size=(3, 3)),
-            torch.nn.BatchNorm2d(out_channels),
+                out_channels, out_channels, kernel_size=(3, 3), padding=1),
+            torch.nn.BatchNorm2d(out_channels, dtype=dtype),
             torch.nn.ReLU(),
 
             torch.nn.Conv2d(
                 out_channels, 4*out_channels, kernel_size=(1, 1)),
-            torch.nn.BatchNorm2d(4*out_channels),
+            torch.nn.BatchNorm2d(4*out_channels, dtype=dtype),
             torch.nn.ReLU(),
         )
 
@@ -124,7 +124,7 @@ class BottleneckBlock(torch.nn.Module):
             torch.nn.Conv2d(
                 in_channels, 4*out_channels, kernel_size=(1, 1), stride=strides
             ),
-            torch.nn.BatchNorm2d(out_channels),
+            torch.nn.BatchNorm2d(4*out_channels, dtype=dtype),
         )
 
         self.activation = torch.nn.Sequential(torch.nn.ReLU())
@@ -196,33 +196,38 @@ class ResNet(torch.nn.Module):
         # Data Ingestion
         self.ingest_block = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels, 64, kernel_size=(7, 7), stride=2, padding=3),
-            torch.nn.BatchNorm2d(64),
+            torch.nn.BatchNorm2d(64, dtype=torch.double),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=(3, 3), padding=1, stride=2),
         )
 
         # Data Processing
+        block_class = ResidualBlock if not bottleneck_blocks else BottleneckBlock
+        output_channels_multiplier: int = 4 if bottleneck_blocks else 1
+
         # Module 1
         m1_structure: int = processing_structure[0]
-        m1 = [ResidualBlock(64, 64) for _ in range(m1_structure)]
+        m1 = [
+            block_class(64, 64)  if i == 0 else block_class(output_channels_multiplier * 64, 64)
+            for i in range(m1_structure)
+        ]
 
         # Modules 2-4
         starting_dim: int = processing_structure[1][0]
         latter_modules_sizes: tuple[int] = processing_structure[1][1]
 
-        block_class = ResidualBlock if not bottleneck_blocks else BottleneckBlock
-        in_dim = 64
+        in_dim = output_channels_multiplier * 64
         out_dim = starting_dim
-        m24: list[ResidualBlock] = []
+        m24: list[torch.nn.Module] = []
         assert len(latter_modules_sizes) == 3
         for module_size in latter_modules_sizes:
             assert module_size >= 1
             m = [block_class(in_dim, out_dim, strides=2)]
             for _ in range(module_size - 1):
-                m.append(block_class(out_dim, out_dim))
+                m.append(block_class(output_channels_multiplier * out_dim, out_dim))
 
             m24 += m
-            in_dim = out_dim
+            in_dim = output_channels_multiplier * out_dim
             out_dim = 2 * out_dim
 
         self.processing_block: torch.nn.Module = torch.nn.Sequential(*m1, *m24)
@@ -232,7 +237,7 @@ class ResNet(torch.nn.Module):
             torch.nn.AdaptiveAvgPool2d((1, 1)),
             torch.nn.Flatten(-3),
             torch.nn.Dropout(0.6),
-            torch.nn.Linear(out_dim // 2, num_classes),
+            torch.nn.Linear(output_channels_multiplier * (out_dim // 2), num_classes),
         )
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:

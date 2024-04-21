@@ -57,7 +57,8 @@ def train_step(
 
         # Fordward pass
         outputs = model(image, embedding)
-        loss_value = loss(outputs, targets)
+        print(outputs.shape, targets.shape)
+        loss_value = loss(outputs, targets.squeeze())
 
         # METRICS
         # Save loss metric
