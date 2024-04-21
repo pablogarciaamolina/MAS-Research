@@ -91,7 +91,7 @@ Output Transform Encoder Model for Multimodal Sentimen Analysis, described by Zh
 
 **Image processing**
 
-The image input is a tensor of shape `[batch, in channels, h, w]`. It passes through a ResNet-50 module and is converted into `[batch, image output dim]`
+The image input is a tensor of shape `[batch, in channels, h, w]`. It passes through a ResNet-50 module and is converted into `[batch, image output dim]`. We also added the possibility for the model to replace the ResNet-50 by a simple CNN in case the data or the computational resources are scarce.
 
 **Text processing**
 

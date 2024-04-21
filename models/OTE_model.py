@@ -31,7 +31,8 @@ class OTE_Model(torch.nn.Module):
             num_classes: int,
             dropout: float = 0.4,
             num_heads: int = 4,
-            attention_dropout: float = 0.1
+            attention_dropout: float = 0.1,
+            use_small_cnn: bool = False
         ) -> None:
         """
         Class constructor.
@@ -45,16 +46,35 @@ class OTE_Model(torch.nn.Module):
             classifier_hidden_size: the size of the hidden layer in the calsification FC.
             num_classes: number of classes for classification.
 
-            dropout: dropout probability for linear layers.
+            dropout: dropout probability for linear layers. Default to 0.4.
             num_heads: the number of heads in the multihead attention of the Transformer Encoder layer.
             attention_dropout: dropout probability specifically for the Transformer Encoder layer
+            use_small_cnn: determines whether to use a smaller CNN instead of the expected ResNet-50 for the image processing. Defaults to False.
         """
 
         super().__init__()
 
         # IMAGE ONLY
-        # self.resnet50 = ResNet50(in_channels=image_in_channels, out_dim=image_out_dim)
-        self.resnet18 = ResNet18(in_channels=image_in_channels, num_classes=image_out_dim)
+        self.use_small_cnn: bool = use_small_cnn
+        if not use_small_cnn:
+            self.resnet50 = ResNet50(in_channels=image_in_channels, out_dim=image_out_dim)
+        else:
+            self.cnn = torch.nn.Sequential(
+                torch.nn.Conv2d(image_in_channels, 64, kernel_size=(7, 7), padding=3, stride=2),
+                torch.nn.ReLU(),
+                torch.nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+                torch.nn.Conv2d(64, 516, 3, padding=1),
+                torch.nn.BatchNorm2d(516),
+                torch.nn.ReLU(),
+                torch.nn.Conv2d(516, 1024, 3, stride=2, padding=1),
+                torch.nn.BatchNorm2d(1024),
+                torch.nn.ReLU(),
+                torch.nn.AdaptiveAvgPool2d((1, 1)),
+                torch.nn.Flatten(-3),
+                torch.nn.Dropout(0.6),
+                torch.nn.Linear(1024, image_out_dim)
+            )
+        
 
         # TEXT ONLY
         self.embedding_transform = torch.nn.Sequential(
@@ -90,8 +110,11 @@ class OTE_Model(torch.nn.Module):
         """
 
         # IMAGE ONLY
-        # processed_images: torch.Tensor = self.resnet50(image_inputs) # [batch, image_out_dim]
-        processed_images: torch.Tensor = self.resnet18(image_inputs) # [batch, image_out_dim]
+
+        if not self.use_small_cnn:
+            processed_images: torch.Tensor = self.resnet50(image_inputs) # [batch, image_out_dim]
+        else:
+            processed_images: torch.Tensor = self.cnn(image_inputs) # [batch, image_out_dim]
 
         # TEXT ONLY
         processed_text: torch.Tensor = self.embedding_transform(text_inputs) # [batch, text_out_dim]
