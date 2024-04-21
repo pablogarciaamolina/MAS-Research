@@ -95,10 +95,6 @@ class SentiCap_Dataset(Dataset):
             emotion = torch.tensor(int(self.info_df["sentiment"][i]), dtype=torch.long)
             torch.save(emotion, path + "/" + "sentiment.pt")
 
-
-
-
-
 def load_data(batch_size: int = 1, shuffle: bool = False,
               num_workers: int = 0) ->\
                   tuple[DataLoader, DataLoader, DataLoader]:

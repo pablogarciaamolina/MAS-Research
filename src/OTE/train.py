@@ -47,6 +47,7 @@ def main() -> None:
     text_out_dim= 64
     classification_hidden_size= 128
     attention_heads= 8 # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
+    use_small_cnn: bool = True
 
     # Scheduler
     weight_decay = 0.01
@@ -82,6 +83,7 @@ def main() -> None:
         num_classes=2,
         dropout=dropout,
         num_heads=attention_heads,
+        use_small_cnn=use_small_cnn
     ).to(device)
     # Set parameters to double
     parameters_to_double(model)
