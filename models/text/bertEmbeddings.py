@@ -24,7 +24,7 @@ class BertEmbeddings(nn.Module):
             inputs: str, the input text.
         """
 
-        tokens = self.tokenizer(inputs, return_tensors='pt',padding=True,truncation=True)
+        tokens = self.tokenizer(inputs, return_tensors='pt', padding=True, truncation=True)
         text_tensor = torch.tensor(self.tokenizer.convert_tokens_to_ids(tokens))
 
         # Obtener los embeddings de la oración

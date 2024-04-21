@@ -48,7 +48,9 @@ def main() -> None:
     classification_hidden_size= 128
     attention_heads= 8 # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
     use_small_cnn: bool = True
-    dim_feed_forward=1024
+    dim_feed_forward = 1024
+    use_word2vec = True
+    text_sequence_max_length = 30
 
     # Scheduler
     weight_decay = 0.01
@@ -60,7 +62,10 @@ def main() -> None:
     print("Loading data...")
     train_data: DataLoader
     val_data: DataLoader
-    train_data, val_data, _, = load_data(batch_size=batch_size)
+    train_data, val_data, _, = load_data(
+        batch_size=batch_size, 
+        use_word2vec=use_word2vec, 
+        seq_length=text_sequence_max_length)
     print("DONE")
 
     # ------------PRE-TRAINING-----------
