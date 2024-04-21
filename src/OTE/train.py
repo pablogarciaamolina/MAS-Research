@@ -41,7 +41,7 @@ def main() -> None:
     # ----HYPERPARAMETERS----
     epochs: int = 100
     lr: float = 0.001
-    batch_size: int = 1
+    batch_size: int = 64
     dropout: float = 0.4
     image_out_dim = 64
     text_out_dim= 64

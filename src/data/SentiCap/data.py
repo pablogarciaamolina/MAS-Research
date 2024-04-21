@@ -53,13 +53,13 @@ class SentiCap_Dataset(Dataset):
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # Get image name
-        image_name = self.info_df["filename"][idx]
+        image_name = self.info_df["filename"].values[idx]
         # Get text tokens
         # txt_tokens = self.info_df["tokens"][idx]
         # Get text
-        text_raw = self.info_df["raw"][idx]
+        text_raw = self.info_df["raw"].values[idx]
         # Get label
-        label = self.info_df["sentiment"][idx]
+        label = self.info_df["sentiment"].values[idx]
         # Transform the image to a torch.tensor
         img_tensor = self.image_transformations(Image.open(self.image_dir + "/" + image_name)).type(torch.double)
         # Transform text into embedding
