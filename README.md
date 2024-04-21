@@ -97,6 +97,8 @@ The image input is a tensor of shape `[batch, in channels, h, w]`. It passes thr
 
 As well as in the AAT model, the text input is passed already tokenized and then embedded using a pretrained BERT model. After that, were a left with a tensor `[batch, sequence size, embedding dim]` which has its last two dimensions squeezed and passed through a FC layer a transformed into `[batch, text output dim]`.
 
+Also, we added the possibility to use a word2vec embedding loaded from memory that is lighter than the BERT embedding, in case of scarse resources.
+
 **Image and Text processing**
 
 The concatenation of the output of both image and text individual processing modules is passed into an attention layer represented by a Transformer Encoder. After that, we are left with an output tensor of shape `[batch, image output dim + text output dim]` (equal to the input dimensions), which is passed through a final classifier module composed of a FC layer. Finally, the output will be a tensor of shape `[batch, num classes]` containing the logits for each class.

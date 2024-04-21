@@ -9,7 +9,7 @@ from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 
 from .file_management import processed_tensors_management
-from models.text import BertEmbeddings
+from models.text import BertEmbeddings, Word2Vec_Embedding
 
 DATA_PATH = "data/SentiCap"
 
@@ -28,7 +28,7 @@ class SentiCap_Dataset(Dataset):
         as it is a known dataste it is divided in train , 
         test and val.
     '''
-    def __init__(self, data_path: str, split: str, images_size: tuple[int, int]=(64, 64)):
+    def __init__(self, data_path: str, split: str, images_size: tuple[int, int]=(64, 64), use_word2vec: bool = False, seq_length: int = 30):
 
         # Save split
         self.split = split
@@ -49,7 +49,10 @@ class SentiCap_Dataset(Dataset):
         # Reduce the amount of data
         self.info_df = self.info_df[:int(len(self.info_df)*0.25)]
         # Embedding for the text
-        self.embedding = BertEmbeddings()
+        if use_word2vec:
+            self.embedding = Word2Vec_Embedding(seq_length)
+        else:
+            self.embedding = BertEmbeddings()
         # Transformation for images
         h, w = images_size
         self.image_transformations = transforms.Compose([
@@ -96,7 +99,9 @@ class SentiCap_Dataset(Dataset):
             torch.save(emotion, path + "/" + "sentiment.pt")
 
 def load_data(batch_size: int = 1, shuffle: bool = False,
-              num_workers: int = 0) ->\
+              num_workers: int = 0,
+              use_word2vec: bool = False,
+              seq_length: int = 30) ->\
                   tuple[DataLoader, DataLoader, DataLoader]:
 
     '''Loads the data from the SentiCap dataset, creating
@@ -138,9 +143,9 @@ def load_data(batch_size: int = 1, shuffle: bool = False,
         shutil.rmtree('credentials/senticap')
 
     # Create each Dataset
-    train_dataset = SentiCap_Dataset(DATA_PATH, 'train')
-    test_dataset = SentiCap_Dataset(DATA_PATH, 'test')
-    val_dataset = SentiCap_Dataset(DATA_PATH, 'val')
+    train_dataset = SentiCap_Dataset(DATA_PATH, 'train', use_word2vec=use_word2vec, seq_length=seq_length)
+    test_dataset = SentiCap_Dataset(DATA_PATH, 'test', use_word2vec=use_word2vec, seq_length=seq_length)
+    val_dataset = SentiCap_Dataset(DATA_PATH, 'val', use_word2vec=use_word2vec, seq_length=seq_length)
     # Create each dataloader
     train_loader = DataLoader(train_dataset, batch_size=batch_size,
                               shuffle=shuffle, num_workers=num_workers)
