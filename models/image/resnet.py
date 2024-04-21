@@ -1,7 +1,7 @@
 import torch
 
 class ResidualBlock(torch.nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, strides: int = 1) -> None:
+    def __init__(self, in_channels: int, out_channels: int, strides: int = 1, dtype: torch.AnyType = torch.double) -> None:
         """
         Constructor of the Residual Block class. It is composed of two branches.
 
@@ -29,10 +29,10 @@ class ResidualBlock(torch.nn.Module):
             torch.nn.Conv2d(
                 in_channels, out_channels, kernel_size=(3, 3), padding=1, stride=strides
             ),
-            torch.nn.BatchNorm2d(out_channels),
+            torch.nn.BatchNorm2d(out_channels, dtype=dtype),
             torch.nn.ReLU(),
             torch.nn.Conv2d(out_channels, out_channels, kernel_size=(3, 3), padding=1),
-            torch.nn.BatchNorm2d(out_channels),
+            torch.nn.BatchNorm2d(out_channels, dtype=dtype),
         )
 
         self.conv_1x1: bool = (
@@ -43,7 +43,7 @@ class ResidualBlock(torch.nn.Module):
                 torch.nn.Conv2d(
                     in_channels, out_channels, kernel_size=(1, 1), stride=strides
                 ),
-                torch.nn.BatchNorm2d(out_channels),
+                torch.nn.BatchNorm2d(out_channels, dtype=dtype),
             )
         else:
             self.residual_branch = torch.nn.Sequential()
