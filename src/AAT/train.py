@@ -24,9 +24,7 @@ from src.data.IEMOCAP import load_data
 DATA_PATH: Final[str] = "data"
 
 # set device and seed
-device = (
-    torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-)
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 set_seed(42)
 
 
@@ -49,8 +47,6 @@ def main() -> None:
 
     # Scheduler
     weight_decay = 0.01
-    max_iter = ...
-    lr_min = ...
     gamma = 0.1
     milestones: list[int] = [15, 30, 40]
     # -----------------------
@@ -59,7 +55,11 @@ def main() -> None:
     print("Loading data...")
     train_data: DataLoader
     val_data: DataLoader
-    train_data, val_data, _, = load_data(batch_size=batch_size, time_dim=time_dim)
+    (
+        train_data,
+        val_data,
+        _,
+    ) = load_data(batch_size=batch_size, time_dim=time_dim)
     print("DONE")
 
     # ------------PRE-TRAINING-----------
@@ -72,7 +72,9 @@ def main() -> None:
     writer: SummaryWriter = SummaryWriter(f"runs/{name}")
 
     # MODEL
-    audio_inputs, text_inputs , _ = next(iter(train_data)) # [batch, f, t, c], [batch, seq, embedding dim], _
+    audio_inputs, text_inputs, _ = next(
+        iter(train_data)
+    )  # [batch, f, t, c], [batch, seq, embedding dim], _
     model: torch.nn.Module = Audio_Text_MSA_Model(
         f_t_c=audio_inputs.shape[1:],
         num_classes=10,
@@ -82,7 +84,7 @@ def main() -> None:
         C=C,
         lrn_mode=lrn_mode,
         lambd=lambd,
-        dropout=dropout
+        dropout=dropout,
     ).to(device)
     # Set parameters to double
     parameters_to_double(model)
@@ -92,13 +94,13 @@ def main() -> None:
 
     # OPTIMIZER
     optimizer: torch.optim.Optimizer = torch.optim.AdamW(
-        model.parameters(), 
-        lr=lr,
-        weight_decay=weight_decay
+        model.parameters(), lr=lr, weight_decay=weight_decay
     )
 
     # SCHEDULER
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=gamma)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        optimizer, milestones=milestones, gamma=gamma
+    )
 
     # EARLY STOPPING
     # register handler for ¡manual! EARLY STOPPING
@@ -109,24 +111,11 @@ def main() -> None:
     for epoch in tqdm(range(epochs)):
         # call train step
         train_loss, train_accuracy = train_step(
-            model,
-            train_data,
-            loss,
-            optimizer,
-            writer,
-            epoch,
-            device
+            model, train_data, loss, optimizer, writer, epoch, device
         )
 
         # call val step
-        val_loss, val_accuracy = val_step(
-            model,
-            val_data,
-            loss,
-            writer,
-            epoch,
-            device
-        )
+        val_loss, val_accuracy = val_step(model, val_data, loss, writer, epoch, device)
 
         print(
             f"Train and Val. accuracy in epoch {epoch}, lr {scheduler.get_lr()}:",

@@ -9,6 +9,7 @@ import random
 
 MODELS_PATH: str = "trained_models"
 
+
 @torch.no_grad()
 def parameters_to_double(model: torch.nn.Module) -> None:
     """
@@ -110,6 +111,7 @@ def compute_mae(predicted: torch.Tensor, actual: torch.Tensor) -> float:
 
     return float(mae)
 
+
 def compute_accuracy(predictions: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
     """
     This function computes the accuracy.
@@ -126,9 +128,8 @@ def compute_accuracy(predictions: torch.Tensor, targets: torch.Tensor) -> torch.
     # TODO
 
     if len(predictions.shape) > 1:
-
         predictions = torch.argmax(predictions, dim=1)
-    
+
     targets = torch.squeeze(targets)
 
     return (predictions == targets).float().mean()

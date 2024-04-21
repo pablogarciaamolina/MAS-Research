@@ -1,7 +1,14 @@
 import torch
 
+
 class ResidualBlock(torch.nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, strides: int = 1, dtype: torch.AnyType = torch.double) -> None:
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        strides: int = 1,
+        dtype: torch.dtype = torch.double,
+    ) -> None:
         """
         Constructor of the Residual Block class. It is composed of two branches.
 
@@ -70,23 +77,32 @@ class ResidualBlock(torch.nn.Module):
         y2 = self.residual_branch(inputs0)
 
         return self.activation(y1 + y2)
-    
+
 
 class BottleneckBlock(torch.nn.Module):
     """
-    Deeper ResNet architectures implement a block with 3 convolutional layers instead of 2, this are the BottleNeck blocks.
+    Deeper ResNet architectures implement a block with 3 convolutional layers instead of
+    2, this are the BottleNeck blocks.
 
-    Defined in "Deep Residual Learning for Image Recognition" (https://arxiv.org/pdf/1512.03385.pdf)
+    Defined in "Deep Residual Learning for Image Recognition"
+    (https://arxiv.org/pdf/1512.03385.pdf)
     """
 
-    def __init__(self, in_channels: int, out_channels: int, strides: int = 1, dtype: torch.AnyType = torch.double) -> None:
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        strides: int = 1,
+        dtype: torch.dtype = torch.double,
+    ) -> None:
         """
         Constructor of the Bottleneck Block class. It is composed of two branches.
 
         - First branch (convolutional branch): 1x1Convolution(optional
-        stride) -> batch norm  -> ReLU -> 3x3Convolution -> batch norm -> ReLU -> 1x1Convolution(4*out_channels) -> batch norm  -> ReLU
+        stride) -> batch norm  -> ReLU -> 3x3Convolution -> batch norm -> ReLU ->
+        1x1Convolution(4*out_channels) -> batch norm  -> ReLU
 
-        -  Second branch (residual branch): Passes the input forward, a 
+        -  Second branch (residual branch): Passes the input forward, a
         1x1Convolution(4*out_channels)(optional stride) is applied in this branch,
         so dimensions match.
 
@@ -107,24 +123,19 @@ class BottleneckBlock(torch.nn.Module):
             ),
             torch.nn.BatchNorm2d(out_channels, dtype=dtype),
             torch.nn.ReLU(),
-
-            torch.nn.Conv2d(
-                out_channels, out_channels, kernel_size=(3, 3), padding=1),
+            torch.nn.Conv2d(out_channels, out_channels, kernel_size=(3, 3), padding=1),
             torch.nn.BatchNorm2d(out_channels, dtype=dtype),
             torch.nn.ReLU(),
-
-            torch.nn.Conv2d(
-                out_channels, 4*out_channels, kernel_size=(1, 1)),
-            torch.nn.BatchNorm2d(4*out_channels, dtype=dtype),
+            torch.nn.Conv2d(out_channels, 4 * out_channels, kernel_size=(1, 1)),
+            torch.nn.BatchNorm2d(4 * out_channels, dtype=dtype),
             torch.nn.ReLU(),
         )
 
-
         self.residual_branch = torch.nn.Sequential(
             torch.nn.Conv2d(
-                in_channels, 4*out_channels, kernel_size=(1, 1), stride=strides
+                in_channels, 4 * out_channels, kernel_size=(1, 1), stride=strides
             ),
-            torch.nn.BatchNorm2d(4*out_channels, dtype=dtype),
+            torch.nn.BatchNorm2d(4 * out_channels, dtype=dtype),
         )
 
         self.activation = torch.nn.Sequential(torch.nn.ReLU())
@@ -150,6 +161,7 @@ class BottleneckBlock(torch.nn.Module):
 
         return self.activation(y1 + y2)
 
+
 class ResNet(torch.nn.Module):
     """
     Class implementing the residual neural network architecture described in
@@ -159,7 +171,11 @@ class ResNet(torch.nn.Module):
     """
 
     def __init__(
-        self, in_channels: int, processing_structure: tuple, num_classes: int, bottleneck_blocks: bool = False
+        self,
+        in_channels: int,
+        processing_structure: tuple,
+        num_classes: int,
+        bottleneck_blocks: bool = False,
     ) -> None:
         """
         Constructor for ResNet class. Following GoogLeNet policy, ResNet sepparates
@@ -188,7 +204,8 @@ class ResNet(torch.nn.Module):
                 (<m2 number of res. blocks: int>, <m3 number of res. blocks: int>,
                 <m4 number of res. blocks: int>) ) )`
             num_classes: output. Number of classes for clasification
-            bottleneck_blocks: defines whether or not to use Bottleneck block instead of regular residual blocks. Usen in deeper ResNet implementations
+            bottleneck_blocks: defines whether or not to use Bottleneck block instead
+            of regular residual blocks. Usen in deeper ResNet implementations
         """
 
         super().__init__()
@@ -208,7 +225,9 @@ class ResNet(torch.nn.Module):
         # Module 1
         m1_structure: int = processing_structure[0]
         m1 = [
-            block_class(64, 64)  if i == 0 else block_class(output_channels_multiplier * 64, 64)
+            block_class(64, 64)
+            if i == 0
+            else block_class(output_channels_multiplier * 64, 64)
             for i in range(m1_structure)
         ]
 
@@ -272,6 +291,7 @@ class ResNet18(ResNet):
             num_classes=num_classes,
         )
 
+
 class ResNet50(ResNet):
     """
     Class wrapper of the original ResNet architecture: ResNet-50
@@ -282,7 +302,8 @@ class ResNet50(ResNet):
         Constructor for the ResNet-50 Module
 
         Args:
-            in_channels: input number of channels. This module expects input of shape `[batch, in_channels, h, w]`
+            in_channels: input number of channels. This module expects input of shape\
+            `[batch, in_channels, h, w]`
             out_dim: output dimension of the ResNet. Ouput of shape `[batch, out_dim]`
         """
 
@@ -290,5 +311,5 @@ class ResNet50(ResNet):
             in_channels,
             processing_structure=(3, (128, (4, 6, 3))),
             num_classes=out_dim,
-            bottleneck_blocks=True
+            bottleneck_blocks=True,
         )

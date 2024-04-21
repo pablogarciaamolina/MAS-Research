@@ -9,7 +9,6 @@ from typing import Final
 import signal
 import time
 import warnings
-warnings.filterwarnings("ignore")
 
 # own modules
 from src.utils import (
@@ -22,13 +21,13 @@ from models import OTE_Model
 from .train_functions import train_step, val_step
 from src.data.SentiCap import load_data
 
+warnings.filterwarnings("ignore")
+
 # static variables
 DATA_PATH: Final[str] = "data"
 
 # set device and seed
-device = (
-    torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-)
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 set_seed(42)
 
 
@@ -44,9 +43,9 @@ def main() -> None:
     batch_size: int = 64
     dropout: float = 0.4
     image_out_dim = 64
-    text_out_dim= 64
-    classification_hidden_size= 128
-    attention_heads= 4 # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
+    text_out_dim = 64
+    classification_hidden_size = 128
+    attention_heads = 4  # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
     use_small_cnn: bool = True
     dim_feed_forward = 2048
     use_word2vec = False
@@ -62,10 +61,15 @@ def main() -> None:
     print("Loading data...")
     train_data: DataLoader
     val_data: DataLoader
-    train_data, val_data, _, = load_data(
-        batch_size=batch_size, 
-        use_word2vec=use_word2vec, 
-        seq_length=text_sequence_max_length)
+    (
+        train_data,
+        val_data,
+        _,
+    ) = load_data(
+        batch_size=batch_size,
+        use_word2vec=use_word2vec,
+        seq_length=text_sequence_max_length,
+    )
     print("DONE")
 
     # ------------PRE-TRAINING-----------
@@ -78,7 +82,9 @@ def main() -> None:
     writer: SummaryWriter = SummaryWriter(f"runs/{name}")
 
     # MODEL
-    image_inputs, text_inputs , _ = next(iter(train_data)) # [batch, in_channels, h, w], [batch, seq, embedding dim], _
+    image_inputs, text_inputs, _ = next(
+        iter(train_data)
+    )  # [batch, in_channels, h, w], [batch, seq, embedding dim], _
     model: torch.nn.Module = OTE_Model(
         image_in_channels=image_inputs.shape[1],
         image_out_dim=image_out_dim,
@@ -90,7 +96,7 @@ def main() -> None:
         dropout=dropout,
         num_heads=attention_heads,
         use_small_cnn=use_small_cnn,
-        dim_feed_forward=dim_feed_forward
+        dim_feed_forward=dim_feed_forward,
     ).to(device)
     # Set parameters to double
     parameters_to_double(model)
@@ -100,13 +106,13 @@ def main() -> None:
 
     # OPTIMIZER
     optimizer: torch.optim.Optimizer = torch.optim.AdamW(
-        model.parameters(), 
-        lr=lr,
-        weight_decay=weight_decay
+        model.parameters(), lr=lr, weight_decay=weight_decay
     )
 
     # SCHEDULER
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=gamma)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        optimizer, milestones=milestones, gamma=gamma
+    )
 
     # EARLY STOPPING
     # register handler for ¡manual! EARLY STOPPING
@@ -117,24 +123,11 @@ def main() -> None:
     for epoch in tqdm(range(epochs)):
         # call train step
         train_loss, train_accuracy = train_step(
-            model,
-            train_data,
-            loss,
-            optimizer,
-            writer,
-            epoch,
-            device
+            model, train_data, loss, optimizer, writer, epoch, device
         )
 
         # call val step
-        val_loss, val_accuracy = val_step(
-            model,
-            val_data,
-            loss,
-            writer,
-            epoch,
-            device
-        )
+        val_loss, val_accuracy = val_step(model, val_data, loss, writer, epoch, device)
 
         print(
             f"Train and Val. accuracy in epoch {epoch}, lr {scheduler.get_lr()}:",

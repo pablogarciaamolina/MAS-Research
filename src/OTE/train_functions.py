@@ -7,9 +7,6 @@ from torch.utils.tensorboard import SummaryWriter
 # own modules
 from src.utils import compute_accuracy
 
-# other libraries
-from typing import Optional
-
 
 @torch.enable_grad()
 def train_step(
@@ -117,7 +114,6 @@ def val_step(
 
     # TODO
     for image, embedding, targets in val_data:
-        
         with torch.no_grad():
             # Pass data and labels to the correct device
             image = image.to(device)
@@ -170,7 +166,6 @@ def test_step(
     model.eval()
 
     for image, embedding, targets in test_data:
-        
         with torch.no_grad():
             # Pass data and labels to the correct device
             image = image.to(device)

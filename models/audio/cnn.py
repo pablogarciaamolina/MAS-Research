@@ -1,6 +1,7 @@
 import torch
 import enum
 
+
 class LRN_MODES(enum.Enum):
     FULL = "full"
     HALF = "half"
@@ -118,25 +119,31 @@ class AlexNet_Based_FCN(torch.nn.Module):
             return in_channels // 2
         elif mode == LRN_MODES.SINGLE.value:
             return 1
-        
-    def get_out_dims(self, in_dims: tuple[int, int, int, int]) -> tuple:
+        else:
+            return -1
+
+    def get_out_dims(
+        self, in_dims: tuple[int, int, int, int]
+    ) -> tuple[int, int, int, int]:
         """
-        Calculates the shape of the dimension using the simplest use case and passing it through the FCN
+        Calculates the shape of the dimension using the simplest use case and
+        passing it through the FCN
 
         Args:
-            in_dims: incoming dimension to predicts their out dimension. Must be of the shape:
+            in_dims: incoming dimension to predicts their out dimension.\
+                Must be of the shape:\
                 `[batch, f, t, c]`
-        
+
         Returns:
             Output dimensions in a tuple in the shape: `[batch, F, T, C]`
         """
 
-        mock_in: torch.Tensor = torch.zeros(1,*in_dims)
+        mock_in: torch.Tensor = torch.zeros(1, *in_dims)
 
         with torch.no_grad():
             mock_out: torch.Tensor = self.forward(mock_in)
-        
-        return tuple(mock_out.shape)
+
+        return tuple(mock_out.shape)  # type:ignore
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         """
@@ -154,16 +161,12 @@ class AlexNet_Based_FCN(torch.nn.Module):
         """
 
         # Reshape inputs
-        inputs = inputs.permute(
-            (0, 3, 1, 2)
-        )  # [batch size, in channel size, f, t]
+        inputs = inputs.permute((0, 3, 1, 2))  # [batch size, in channel size, f, t]
 
         # Pass through AlexNet FCN
-        outputs: torch.Tensor = self.fcn(
-            inputs
-        )  # [batch size, out channel size, F, C]
+        outputs: torch.Tensor = self.fcn(inputs)  # [batch size, out channel size, F, C]
 
         # Reshape to desired output
-        outputs = outputs.permute(0, 2, 3, 1) # [batch, F, T, C]
+        outputs = outputs.permute(0, 2, 3, 1)  # [batch, F, T, C]
 
         return outputs

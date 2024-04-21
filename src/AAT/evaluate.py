@@ -8,14 +8,13 @@ from typing import Final
 
 # own modules
 from src.utils import set_seed, load_model
+from .train_functions import test_step
 
 # static variables
 DATA_PATH: Final[str] = "data"
 
 # set device
-device = (
-    torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-)
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 set_seed(42)
 
 
@@ -27,13 +26,13 @@ def main(name: str) -> float:
     # TODO
     # load data
     test_data: DataLoader
-    _, _, test_data, mean, std = ...
+    _, _, test_data = load_model(name)
 
     # define model
     model: RecursiveScriptModule = load_model(f"{name}").to(device)
 
     # call test step and evaluate accuracy
-    accuracy: float = ...
+    accuracy: float = test_step(model, test_data, device)
 
     return accuracy
 
