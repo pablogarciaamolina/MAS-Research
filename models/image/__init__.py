@@ -1,1 +1,1 @@
-from .resnet import ResNet50
+from .resnet import ResNet50, ResNet18

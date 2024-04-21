@@ -1,5 +1,5 @@
 import torch
-from .image import ResNet50
+from .image import ResNet50, ResNet18
 
 class OTE_Model(torch.nn.Module):
     """
@@ -53,7 +53,8 @@ class OTE_Model(torch.nn.Module):
         super().__init__()
 
         # IMAGE ONLY
-        self.resnet50 = ResNet50(in_channels=image_in_channels, out_dim=image_out_dim)
+        # self.resnet50 = ResNet50(in_channels=image_in_channels, out_dim=image_out_dim)
+        self.resnet50 = ResNet18(in_channels=image_in_channels, num_classes=image_out_dim)
 
         # TEXT ONLY
         self.embedding_transform = torch.nn.Sequential(
