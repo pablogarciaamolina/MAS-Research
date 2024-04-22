@@ -131,18 +131,20 @@ Finally, the same strategy as with the IEMOCAP dataset has been used in orther t
 
 ## Requirements
 
-    gdown==5.1.0
-    gensim==4.3.2
-    numpy==1.26.4
-    opendatasets==0.1.22
-    pandas==2.2.2
-    Pillow==10.0.1
-    Pillow==10.3.0
-    scipy==1.13.0
-    torch==2.1.1
-    torchvision==0.16.1
-    tqdm==4.66.1
-    transformers==4.39.3
+```python
+gdown==5.1.0
+gensim==4.3.2
+numpy==1.26.4
+opendatasets==0.1.22
+pandas==2.2.2
+Pillow==10.0.1
+Pillow==10.3.0
+scipy==1.13.0
+torch==2.1.1
+torchvision==0.16.1
+tqdm==4.66.1
+transformers==4.39.3
+```
 
 ```shell
 pip install -r requirements.txt
