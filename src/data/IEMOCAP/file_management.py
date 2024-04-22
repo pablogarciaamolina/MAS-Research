@@ -97,7 +97,7 @@ def audio_management() -> None:
     has its own folder. This function moves all the audio files to a
     single directory
     """
-    
+
     audio_dir = f"{DATA_PATH}/Not_Sorted_Audio"
     destination_dir = f"{DATA_PATH}/Audio"
 
@@ -130,7 +130,7 @@ def text_management() -> None:
     file (with the id of the utterance) contains the transcript of the
     utterance.
     """
-    
+
     # Paths for the source and destination of the files
     text_dir = f"{DATA_PATH}/Not_Sorted_Text"
     destination_dir = f"{DATA_PATH}/Text"
@@ -177,7 +177,7 @@ def processed_tensors_management(list_dirs: list[str]) -> None:
         list_dirs: the name of the sub directories in the tensors folders. One\
             for every group of data tensors
     """
-    
+
     # Paths for the source and destination of the files
     master_directory = DATA_PATH + PROCESSED_TENSORS_PATH
 
@@ -191,7 +191,6 @@ def processed_tensors_management(list_dirs: list[str]) -> None:
 
 
 if __name__ == "__main__":
-
     # Delete the old directories
     if os.path.exists(f"{DATA_PATH}/Emotion/Utterances"):
         shutil.rmtree(f"{DATA_PATH}/Emotion/Utterances")

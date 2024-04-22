@@ -56,7 +56,6 @@ class IEMOCAP_Dataset(Dataset):
         self._save_embeddings_and_spectrograms()
 
     def __len__(self):
-
         return len(self.files)
 
     def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -124,7 +123,6 @@ def log_specgram(
     step_size: int = 10,
     eps: float = 1e-10,
 ) -> tuple[np.ndarray, np.ndarray]:
-    
     """Computes the log of the spectrogram of audio data.
     This will be used to convert the audio (.wav) files into
     spectrograms (which are much easier to work with).
@@ -173,7 +171,7 @@ def audio2spectrogram(filepath: str) -> np.ndarray:
     return spectrogram
 
 
-def get_3d_spec(Sxx_in: np.ndarray, moments: tuple = None) -> np.ndarray:
+def get_3d_spec(Sxx_in: np.ndarray, moments: tuple = []) -> np.ndarray:  # type:ignore
     """
     Converts a spectrogram to a 3D tensor, with dimensions
     (height, width, channels). The channels are the base spectrogram,
@@ -190,7 +188,7 @@ def get_3d_spec(Sxx_in: np.ndarray, moments: tuple = None) -> np.ndarray:
     """
 
     # Compute the first and second derivatives
-    if moments is not None:
+    if moments:
         (base_mean, base_std, delta_mean, delta_std, delta2_mean, delta2_std) = moments
     # If moments is not provided, assume mean=0 and std=1
     else:

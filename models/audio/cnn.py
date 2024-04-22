@@ -124,7 +124,7 @@ class AlexNet_Based_FCN(torch.nn.Module):
 
     def get_out_dims(
         self, in_dims: tuple[int, int, int, int]
-    ) -> tuple[int, int, int, int]:
+    ) -> tuple[int, int, int, int]:  # type:ignore
         """
         Calculates the shape of the dimension using the simplest use case and
         passing it through the FCN

@@ -137,14 +137,11 @@ class OTE_Model(torch.nn.Module):
 
         # IMAGE ONLY
 
+        processed_images: torch.Tensor
         if not self.use_small_cnn:
-            processed_images: torch.Tensor = self.resnet50(
-                image_inputs
-            )  # [batch, image_out_dim]
+            processed_images = self.resnet50(image_inputs)  # [batch, image_out_dim]
         else:
-            processed_images: torch.Tensor = self.cnn(
-                image_inputs
-            )  # [batch, image_out_dim]
+            processed_images = self.cnn(image_inputs)  # [batch, image_out_dim]
 
         # TEXT ONLY
         processed_text: torch.Tensor = self.embedding_transform(

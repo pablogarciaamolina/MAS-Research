@@ -8,12 +8,14 @@ EMBEDDING_DATA_PATH: str = "data/Embeddings/GoogleNews-vectors-negative300.bin.g
 
 class Word2Vec_Embedding(torch.nn.Module):
     """
-    Class for the Word2Vec-type-based embedding module. It serves as a text processing module that recieves a raw text input in sentence-type and returns the embedded version.
+    Class for the Word2Vec-type-based embedding module. It serves as a text processing
+    module that recieves a raw text input in sentence-type and returns the
+    embedded version.
 
-    The embedding is loaded from memory, and in case it is not in the specified folder it will be dowloaded from
-    https://drive.usercontent.google.com/download?id=0B7XkCwpI5KDYNlNUTTlSS21pQmM&export=download&authuser=0&resourcekey=0-wjGZdNAUop6WykTtMip30g
+    The embedding is loaded from memory, and in case it is not in the specified
+    folder it will be dowloaded from https://drive.usercontent.google.com/download?id=0B7XkCwpI5KDYNlNUTTlSS21pQmM&export=download&authuser=0&resourcekey=0-wjGZdNAUop6WykTtMip30g
     """
-    
+
     def __init__(self, sequence_size: int) -> None:
         """
         Constructor for the class
@@ -22,7 +24,7 @@ class Word2Vec_Embedding(torch.nn.Module):
             sequence_size: sequence dimension. If the final embedding surpasses\
                 or does not reach this maxi limit it will be cropped or padded.
         """
-        
+
         super().__init__()
 
         url = "https://drive.usercontent.google.com/download?id=0B7XkCwpI5KDYNlNUTTlSS21pQmM&export=download&authuser=0&resourcekey=0-wjGZdNAUop6WykTtMip30g"
@@ -35,7 +37,8 @@ class Word2Vec_Embedding(torch.nn.Module):
 
     def _words_to_index(self, words: list[str]) -> torch.Tensor:
         """
-        This method transforms a set of words into a tensor containing its indexes on the embedding vocabulary.
+        This method transforms a set of words into a tensor containing its
+        indexes on the embedding vocabulary.
 
         Args:
             words: list of words.
@@ -49,15 +52,17 @@ class Word2Vec_Embedding(torch.nn.Module):
 
     def _get_seq(self, tokens: list[str]) -> list[torch.Tensor]:
         """
-        This method transforms a list of tokens into their embeddings and then concatenates them to forma the output tensor.
+        This method transforms a list of tokens into their embeddings and then
+        concatenates them to forma the output tensor.
 
         Args:
             tokens: list of tokens
 
         Return:
-            A tensor containing the embedding of the tokens. Shape `[num tokens, embedding dim]`
+            A tensor containing the embedding of the tokens. Shape
+            `[num tokens, embedding dim]`
         """
-        
+
         tensors = []
         for x in tokens:
             try:

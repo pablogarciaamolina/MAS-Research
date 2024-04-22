@@ -5,8 +5,9 @@ from transformers import BertModel, BertTokenizer
 
 class BertEmbeddings(nn.Module):
     """
-    Class for the embedding module. It uses as a pretrained embedding model loaded using the transformer library.
-    Also, it includes a tokenizer, this way the module recieves input as raw text data and returns the embedded sentence.
+    Class for the embedding module. It uses as a pretrained embedding model loaded
+    using the transformer library. Also, it includes a tokenizer, this way the module
+    recieves input as raw text data and returns the embedded sentence.
     """
 
     def __init__(self) -> None:

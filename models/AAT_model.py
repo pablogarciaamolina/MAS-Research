@@ -71,7 +71,7 @@ class Audio_Text_MSA_Model(torch.nn.Module):
 
         # AUDIO ONLY
         self.alexnet = AlexNet_Based_FCN(in_channels=c, C=C, lrn_mode=lrn_mode)
-        _, F, T, _ = self.alexnet.get_out_dims(f_t_c)
+        _, F, T, _ = self.alexnet.get_out_dims(f_t_c)  # type:ignore
         L = F * T
         self.attention = Audio_Attention(L=L, C=C, lambd=lambd)
         self.audio_linear = torch.nn.Sequential(

@@ -40,7 +40,7 @@ class SentiCap_Dataset(Dataset):
                 as it is a known dataste it is divided in train ,\
                 test and val.
         """
-        
+
         # Save split
         self.split = split
         # Path in which the images are stored
@@ -123,7 +123,6 @@ def load_data(
     use_word2vec: bool = False,
     seq_length: int = 30,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
-    
     """
     Loads the data from the SentiCap dataset, creating
     the training, validation, and testing dataloaders.
@@ -138,7 +137,7 @@ def load_data(
     val_loader: The validation dataloader
     test_loader: The testing dataloader
     """
-    
+
     # Download data if data/SentiCap is empty
     data_dir = "data/SentiCap"
 

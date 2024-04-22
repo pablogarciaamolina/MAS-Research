@@ -3,9 +3,6 @@ import torch
 from torch.utils.data import DataLoader
 from torch.jit import RecursiveScriptModule
 
-# other libraries
-from typing import Final
-
 # own modules
 from src.utils import set_seed, load_model
 from .train_functions import test_step
@@ -18,7 +15,8 @@ set_seed(42)
 
 def main(name: str) -> float:
     """
-    This function is the main program for evaluation a model under the name of 'best_model.pt'
+    This function is the main program for evaluation a model under
+    the name of 'best_model.pt'
     """
 
     # TODO
