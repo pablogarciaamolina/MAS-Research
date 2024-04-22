@@ -109,10 +109,17 @@ The concatenation of the output of both image and text individual processing mod
 
 ### IEMOCAP
 
-We use IEMOCAP as a source of audio and text data.
-...
+We use IEMOCAP as a source of audio and text data. As mentioned before, we processed incoming audio data by transforming it into 3D spectrogram form, and the passing it to the model. In the case of text, we consider the embedding of the raw text as part of the data processing, since we had no intention of further traininf any of the embeddings.
+
+This way, we constructed the dataprocessing stage to load the data spread across the multiple olders that form IEMOCAP, and safed the already processed tensors in memory. This strategy is used for better speed when loading data at every step, as well as sparing more RAM memory. This approach was not the initial strategy, as we started by loading from IEMOCAP and transforming the data at every step. Either way, RAM spare memory has shown improvements but the computational speed stayed pretty much the same.
 
 ### SentiCap
+
+SentiCap contains images and text. The text is saved in a .csv file with a refernce to its correspondant image. The images are saved in a separate folder. THe text is composed of small description (arround 15-20 words) of the corresponding images. The images are not equally shaped and have really different sizes. This can be one of the main difficulties, sine very big images slow down the computations. To address this issue, we resize the images to 64x64 (default) in the dataprocessing stag.
+
+As one may assume, this dataset is far lighter than the IEMOCAP, and that is the main reason why it has been used.
+
+Finally, the same strategy as with the IEMOCAP dataset has been used in orther to speed up training and avoid overloading the RAM. Thus, data is processed once and saved as tensors (.pt files) in memory, so later can be retrieved very easily and fast. Again, using this method does not appear to have significant effects.
 
 
 ## Requirements
