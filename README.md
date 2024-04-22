@@ -10,7 +10,10 @@ Finally, be aware this research is conditioned by time as well as computational 
 
 ```
 |-- MSA-Research
+|   |-- credentials
 |   |-- data
+|   |   |-- Embeddings
+|   |   |   |-- ...
 |   |   |-- IEMOCAP
 |   |   |   |-- ...
 |   |   |-- SentiCap
@@ -19,7 +22,8 @@ Finally, be aware this research is conditioned by time as well as computational 
 |   |   |-- MSA_Project_Proposal.pdf
 |   |   |-- MSA_Project_Report.pdf
 |   |-- images
-|   |   |-- Audio-and-Text-Model_image.png
+|   |   |-- AAT_Model_image.png
+|   |   |-- OTE_Model_image.png
 |   |-- models
 |   |   |-- audio
 |   |   |   |-- __init__.py
@@ -31,6 +35,7 @@ Finally, be aware this research is conditioned by time as well as computational 
 |   |   |-- text
 |   |   |   |-- __init__.py
 |   |   |   |-- bertEmbedding.py
+|   |   |   |-- word2vec.py
 |   |   |-- __init__.py
 |   |   |-- AAT_model.py
 |   |   |-- OTE_model.py
@@ -53,11 +58,13 @@ Finally, be aware this research is conditioned by time as well as computational 
 |   |   |   |-- SentiCap
 |   |   |   |   |-- __init__.py
 |   |   |   |   |-- data.py
+|   |   |   |   |-- file_management.py
 |   |   |   |-- __init__.py
 |   |   |-- __init__.py
 |   |   |-- utils.py
 |   |-- .gitignore
 |   |-- README.md
+|   |-- requirements.txt
 ```
 
 ## Models
