@@ -1,0 +1,4 @@
+# Ignore chache created when running on local
+__pycache__/
+# Ignore model runs logs, usually only finished models will be commited
+runs/
