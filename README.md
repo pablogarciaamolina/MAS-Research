@@ -120,6 +120,8 @@ We use IEMOCAP as a source of audio and text data. As mentioned before, we proce
 
 This way, we constructed the dataprocessing stage to load the data spread across the multiple olders that form IEMOCAP, and safed the already processed tensors in memory. This strategy is used for better speed when loading data at every step, as well as sparing more RAM memory. This approach was not the initial strategy, as we started by loading from IEMOCAP and transforming the data at every step. Either way, RAM spare memory has shown improvements but the computational speed stayed pretty much the same.
 
+Link for dowload here [IEMOCAP](https://sail.usc.edu/iemocap/). Note that there's no atomatic download in the code.
+
 ### SentiCap
 
 SentiCap contains images and text. The text is saved in a .csv file with a refernce to its correspondant image. The images are saved in a separate folder. THe text is composed of small description (arround 15-20 words) of the corresponding images. The images are not equally shaped and have really different sizes. This can be one of the main difficulties, sine very big images slow down the computations. To address this issue, we resize the images to 64x64 (default) in the dataprocessing stag.
@@ -127,6 +129,8 @@ SentiCap contains images and text. The text is saved in a .csv file with a refer
 As one may assume, this dataset is far lighter than the IEMOCAP, and that is the main reason why it has been used.
 
 Finally, the same strategy as with the IEMOCAP dataset has been used in orther to speed up training and avoid overloading the RAM. Thus, data is processed once and saved as tensors (.pt files) in memory, so later can be retrieved very easily and fast. Again, using this method does not appear to have significant effects.
+
+There's code included for dowloading this dataset automatically. There's two ways to do it, either introduce your Kaggle credentials in de `credentials` folder (`kaggle.json`), or you'll be asked to enter a valid username and password once running the code.
 
 
 ## Requirements
@@ -164,3 +168,9 @@ python -m src.AAT.train
 ```shell
 python -m src.OTE.train
 ```
+
+## Other
+
+### Embeddings
+
+As mentioned above, both BERT-type and Word2vec-type embeddings are avaliable for processing the text inputs, none of which are retrained. For using the BERT embedding, nothing has to be taken into account, since is well address via the `transformers` library. However, when using the word2vec, one must know that it is a model tha has to be loaded from memory, and although is simpler than the BERT embedding, it might as well take longer to load. Also, is **very important** that ther exists the folder `data/Embeddings` for allowing the Word2Vec to be dowloaded and then loaded from memory. It will be stored in said folder under the name `GoogleNews-vectors-negative300.bin.gz`.
