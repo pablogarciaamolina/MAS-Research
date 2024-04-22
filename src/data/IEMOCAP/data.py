@@ -13,6 +13,7 @@ from models.text.bertEmbeddings import BertEmbeddings
 
 
 DATA_PATH = "data/IEMOCAP"
+PROCESSED_TENSORS_PATH = "Processed_tensors"
 TEST_SIZE = 0.2
 VAL_SIZE = 0.2
 
@@ -23,20 +24,21 @@ class IEMOCAP_Dataset(Dataset):
     Additionally, it will apply preprocessing to both
     audio (by converting it to a spectrogram) and text
     (by tokenizing it using the BERT tokenizer).
-
-    Parameters
-    ----------
-    data_path : str
-        The path to the data folder (as such, the data,
-        with the audio, text, and emotion files, should
-        already be stored there).
-    audio_time : int
-        The length of the audio files (in periods of sampling) to
-        consider. Default is 1520, which corresponds to 1520, which
-        is the max length of the audio files in our dataset.
     """
 
-    def __init__(self, data_path: str, audio_time: int = 1520):
+    def __init__(self, data_path: str, audio_time: int = 1520) -> None:
+        """
+        Constructor for the IEMCAP_Dataset
+
+        Args:
+            data_path: str\
+                The path to the data folder (as such, the data,\
+                with the audio, text, and emotion files, should\
+                already be stored there).
+            audio_time: int\
+                The length of the audio files (in periods of sampling) to\
+                consider. Default is 1520.
+        """
         self.audio_time = audio_time
         # Paths to the folders
         self.audio_dir = os.path.join(data_path, "Audio")
@@ -54,13 +56,14 @@ class IEMOCAP_Dataset(Dataset):
         self._save_embeddings_and_spectrograms()
 
     def __len__(self):
+
         return len(self.files)
 
     def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # Get the file name
         file = self.files[idx]
 
-        path = DATA_PATH + "/" + "Processed_tensors" + "/" + file
+        path = DATA_PATH + "/" + PROCESSED_TENSORS_PATH + "/" + file
 
         text: torch.Tensor = torch.load(path + "/" + "text.pt")
         audio: torch.Tensor = torch.load(path + "/" + "audio.pt")
@@ -77,7 +80,7 @@ class IEMOCAP_Dataset(Dataset):
         processed_tensors_management(self.files)
 
         for file in self.files:
-            path: str = DATA_PATH + "/" + "Processed_tensors" + "/" + file
+            path: str = DATA_PATH + "/" + PROCESSED_TENSORS_PATH + "/" + file
             # Text
             text_file = os.path.join(self.text_dir, file + ".txt")
             with open(text_file, "r") as f:
@@ -120,30 +123,23 @@ def log_specgram(
     window_size: int = 20,
     step_size: int = 10,
     eps: float = 1e-10,
-):
+) -> tuple[np.ndarray, np.ndarray]:
+    
     """Computes the log of the spectrogram of audio data.
     This will be used to convert the audio (.wav) files into
     spectrograms (which are much easier to work with).
 
-    Parameters
-    ----------
-    audio : np.array
-        The audio data
-    sample_rate : int
-        The sample rate of the audio data (in Hz)
-    window_size : int
-        The size of the window for the FFT (in ms)
-    step_size : int
-        The size of the step between windows (in ms)
-    eps : float
-        A small value to avoid log(0)
+    Args:
+        audio: np.array. The audio data
+        sample_rate: int. The sample rate of the audio data (in Hz)
+        window_size: int. The size of the window for the FFT (in ms)
+        step_size: int. The size of the step between windows (in ms)
+        eps: float. A small value to avoid log(0)
 
-    Returns
-    -------
-    freqs : np.array
-        The frequencies of the spectrogram
-    spectrogram : np.array
-        The log of the spectrogram
+    Returns:
+        A tuple containing the arrays of freqs and spectrogram.
+        freqs: The frequencies of the spectrogram
+        spectrogram: The log of the spectrogram
     """
     nperseg: int = int(round(window_size * sample_rate / 1e3))
     noverlap: int = int(round(step_size * sample_rate / 1e3))
@@ -158,45 +154,41 @@ def log_specgram(
     return freqs, np.log(spec.T.astype(np.float32) + eps)
 
 
-def audio2spectrogram(filepath: str):
-    """Converts an audio file to a spectrogram.
+def audio2spectrogram(filepath: str) -> np.ndarray:
+    """
+    Converts an audio file to a spectrogram.
 
-    Parameters
-    ----------
-    filepath : str
-        The path to the audio file
+    Args:
+        filepath: str. The path to the audio file
 
-    Returns
-    -------
-    spectrogram : np.array
+    Returns:
         The log of the spectrogram
     """
+
     # Read the audio file (memory-mapped to avoid loading the whole file)
     samplerate, test_sound = wavfile.read(filepath, mmap=True)
     # Compute the spectrogram
     _, spectrogram = log_specgram(test_sound, samplerate)
+
     return spectrogram
 
 
-def get_3d_spec(Sxx_in, moments=None):
-    """Converts a spectrogram to a 3D tensor, with dimensions
+def get_3d_spec(Sxx_in: np.ndarray, moments: tuple = None) -> np.ndarray:
+    """
+    Converts a spectrogram to a 3D tensor, with dimensions
     (height, width, channels). The channels are the base spectrogram,
     the first derivative, and the second derivative.
 
-    Parameters
-    ----------
-    Sxx_in : np.array
-        The input spectrogram
-    moments : tuple
-        The mean and standard deviation of the base spectrogram, the first
-        derivative, and the second derivative. If None, the mean is 0 and
-        the standard deviation is 1.
+    Args:
+        Sxx_in: The input spectrogram
+        moments The mean and standard deviation of the base spectrogram, the first
+            derivative, and the second derivative. If None, the mean is 0 and
+            the standard deviation is 1.
 
-    Returns
-    -------
-    np.array
+    Returns:
         The 3D tensor
     """
+
     # Compute the first and second derivatives
     if moments is not None:
         (base_mean, base_std, delta_mean, delta_std, delta2_mean, delta2_std) = moments
@@ -218,6 +210,7 @@ def get_3d_spec(Sxx_in, moments=None):
     delta = (delta - delta_mean) / delta_std
     delta2 = (delta2 - delta2_mean) / delta2_std
     stacked: list = [arr.reshape((h, w, 1)) for arr in (base, delta, delta2)]
+
     return np.concatenate(stacked, axis=2)
 
 
@@ -227,28 +220,20 @@ def load_data(
     shuffle: bool = False,
     num_workers: int = 0,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
-    """Loads the data from the IEMOCAP dataset, creating
+    """
+    Loads the data from the IEMOCAP dataset, creating
     the training, validation, and testing dataloaders.
 
-    Parameters
-    ----------
-    time_dim:
-        Size for audio time dimension
-    batch_size : int
-        The batch size for the DataLoader
-    shuffle : bool
-        Whether to shuffle the training data
-    num_workers : int
-        The number of workers for the DataLoader
+    Args:
+        time_dim: Size for audio time dimension
+        batch_size: The batch size for the DataLoader
+        shuffle: Whether to shuffle the training data
+        num_workers: The number of workers for the DataLoader
 
-    Returns
-    -------
-    train_loader : DataLoader
-        The training dataloader
-    val_loader : DataLoader
-        The validation dataloader
-    test_loader : DataLoader
-        The testing dataloader
+    Returns:
+        train_loader: The training dataloader
+        val_loader: The validation dataloader
+        test_loader: The testing dataloader
     """
     # Create the dataset
     dataset = IEMOCAP_Dataset(DATA_PATH, audio_time=time_dim)

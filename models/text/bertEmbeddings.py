@@ -4,7 +4,12 @@ from transformers import BertModel, BertTokenizer
 
 
 class BertEmbeddings(nn.Module):
-    def __init__(self):
+    """
+    Class for the embedding module. It uses as a pretrained embedding model loaded using the transformer library.
+    Also, it includes a tokenizer, this way the module recieves input as raw text data and returns the embedded sentence.
+    """
+
+    def __init__(self) -> None:
         super(BertEmbeddings, self).__init__()
         """
         Constructor of the BertEmbeddings class.
@@ -14,14 +19,16 @@ class BertEmbeddings(nn.Module):
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-cased")
 
         self.bert = BertModel.from_pretrained("bert-base-uncased")
-        # pre_emb_dim: int = self.bert.config.hidden_size
 
-    def forward(self, inputs):
+    def forward(self, inputs) -> torch.Tensor:
         """
         Forward pass of the model.
 
         Args:
             inputs: str, the input text.
+
+        Return:
+            A tensor, with the embedded sentence, of shape [sequence len, embedding dim]
         """
 
         tokens = self.tokenizer(

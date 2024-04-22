@@ -40,7 +40,7 @@ class Audio_Attention(torch.nn.Module):
         # MLP layer
         # It will recieve a tensor of shape [batch size, C, L] and return a tensor
         # [batch, C, L] with the new representation of A
-        # self.mlp = torch.nn.Linear(L, L)
+        self.mlp = torch.nn.Linear(L, L)
 
         # Learnable vector u
         self.u = torch.nn.Parameter(torch.randn(C, 1))
@@ -66,7 +66,7 @@ class Audio_Attention(torch.nn.Module):
         space_A = inputs.view(inputs.shape[0], inputs.shape[1], -1)  # [batch, C, L]
 
         # # Apply MLP layer to obtain new representations of A
-        # space_A = self.mlp(space_A)  # [batch, C, L]
+        space_A = self.mlp(space_A)  # [batch, C, L]
 
         # Obtain importance weights e [batch, L]
         e = torch.matmul(torch.tanh(space_A).permute(0, 2, 1), self.u).squeeze()

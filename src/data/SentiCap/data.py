@@ -12,22 +12,13 @@ from .file_management import processed_tensors_management
 from models.text import BertEmbeddings, Word2Vec_Embedding
 
 DATA_PATH = "data/SentiCap"
+PROCESSED_TENSORS_PATH = "Processed_tensors"
 
 
 class SentiCap_Dataset(Dataset):
-    """Customized dataset for the SentiCap dataset.
+    """
+    Customized dataset for the SentiCap dataset.
     It will contain image, text, and sentiment labels.
-
-    Parameters
-    ----------
-    data_path : str
-        The path to the data folder (as such, the data,
-        with the audio, text, and emotion files, should
-        already be stored there).
-    split : str
-        The split (train, val or test) in which each dataset is,
-        as it is a known dataste it is divided in train ,
-        test and val.
     """
 
     def __init__(
@@ -37,7 +28,19 @@ class SentiCap_Dataset(Dataset):
         images_size: tuple[int, int] = (64, 64),
         use_word2vec: bool = False,
         seq_length: int = 30,
-    ):
+    ) -> None:
+        """
+        Class constructor.
+
+        Args:
+            data_path: The path to the data folder (as such, the data,\
+                with the audio, text, and emotion files, should\
+                already be stored there).
+            split: The split (train, val or test) in which each dataset is,\
+                as it is a known dataste it is divided in train ,\
+                test and val.
+        """
+        
         # Save split
         self.split = split
         # Path in which the images are stored
@@ -78,7 +81,7 @@ class SentiCap_Dataset(Dataset):
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         file = self.split + f"_{idx}"
 
-        path = DATA_PATH + "/" + "Processed_tensors" + "/" + file
+        path = DATA_PATH + "/" + PROCESSED_TENSORS_PATH + "/" + file
 
         text: torch.Tensor = torch.load(path + "/" + "text.pt")
         image: torch.Tensor = torch.load(path + "/" + "image.pt")
@@ -87,13 +90,18 @@ class SentiCap_Dataset(Dataset):
         return image, text, sentiment
 
     def _save_images_and_embeddings(self) -> None:
+        """
+        Saves in memory the processed data, both the embedded text inputs and
+        the spectrograms of the audio.
+        """
+
         list_dir = [self.split + f"_{i}" for i in range(len(self.info_df))]
 
         processed_tensors_management(list_dir)
 
         for i in range(len(self.info_df)):
             file = self.split + f"_{i}"
-            path: str = DATA_PATH + "/" + "Processed_tensors" + "/" + file
+            path: str = DATA_PATH + "/" + PROCESSED_TENSORS_PATH + "/" + file
             # Text
             text_tensor = self.embedding(self.info_df["raw"][i]).type(torch.double)
             torch.save(text_tensor, path + "/" + "text.pt")
@@ -115,27 +123,22 @@ def load_data(
     use_word2vec: bool = False,
     seq_length: int = 30,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
-    """Loads the data from the SentiCap dataset, creating
+    
+    """
+    Loads the data from the SentiCap dataset, creating
     the training, validation, and testing dataloaders.
 
-    Parameters
-    ----------
-    batch_size : int
-        The batch size for the DataLoader
-    shuffle : bool
-        Whether to shuffle the training data
-    num_workers : int
-        The number of workers for the DataLoader
+    Args:
+        batch_size: The batch size for the DataLoader
+        shuffle: Whether to shuffle the training data
+        num_workers: The number of workers for the DataLoader
 
-    Returns
-    -------
-    train_loader : DataLoader
-        The training dataloader
-    val_loader : DataLoader
-        The validation dataloader
-    test_loader : DataLoader
-        The testing dataloader
+    Returns:
+    train_loader: The training dataloader
+    val_loader: The validation dataloader
+    test_loader: The testing dataloader
     """
+    
     # Download data if data/SentiCap is empty
     data_dir = "data/SentiCap"
 

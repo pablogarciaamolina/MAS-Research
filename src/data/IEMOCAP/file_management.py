@@ -2,14 +2,17 @@ import os
 import shutil
 
 DATA_PATH = "data/IEMOCAP"
+PROCESSED_TENSORS_PATH = "Processed_tensors"
 
 
-def emotion_management_1():
-    """Initially, the emotions are stored both in txt and anvil files. This
+def emotion_management_1() -> None:
+    """
+    Initially, the emotions are stored both in txt and anvil files. This
     function filters only the text files. Additionally, given that the
     utterances are rated by multiple annotators,
     we only store the first rating.
     """
+
     # The directory containing the emotions' files
     emot_dir = f"{DATA_PATH}_PATH/Not_Sorted_Emotion/Emotion"
     # The directory where the individual .txt files will be stored
@@ -36,8 +39,9 @@ def emotion_management_1():
                 scenes[name_scene] = True
 
 
-def emotion_management_2():
-    """After emotion_management_1, the categorization of the emotions
+def emotion_management_2() -> dict[str, int]:
+    """
+    After emotion_management_1, the categorization of the emotions
     is stored in text files, corresponding one to each dialog, out of the
     28 available. This function reads the text files and stores the
     utterances in separate files, each containing the emotion of the
@@ -45,8 +49,9 @@ def emotion_management_2():
     from 0. The corresponding mapping is returned.
 
     Returns:
-        dict: A dictionary mapping emotions (strings) to numbers.
+        A dictionary mapping emotions (strings) to numbers.
     """
+
     i = 0
     emotion_dict = {}
 
@@ -86,11 +91,13 @@ def emotion_management_2():
     return emotion_dict
 
 
-def audio_management():
-    """The audio is already segmented in utterances, but each dialog
+def audio_management() -> None:
+    """
+    The audio is already segmented in utterances, but each dialog
     has its own folder. This function moves all the audio files to a
     single directory
     """
+    
     audio_dir = f"{DATA_PATH}/Not_Sorted_Audio"
     destination_dir = f"{DATA_PATH}/Audio"
 
@@ -114,14 +121,16 @@ def audio_management():
                     shutil.move(source_path, destination_path)
 
 
-def text_management():
-    """With text, a similar problem arises as with emotions. Initially,
+def text_management() -> None:
+    """
+    With text, a similar problem arises as with emotions. Initially,
     the text is stored in a single file for each dialog. This function
     reads the text files and stores the utterances in separate files,
     each containing the transcript of the utterance. Therefore, each
     file (with the id of the utterance) contains the transcript of the
     utterance.
     """
+    
     # Paths for the source and destination of the files
     text_dir = f"{DATA_PATH}/Not_Sorted_Text"
     destination_dir = f"{DATA_PATH}/Text"
@@ -160,8 +169,17 @@ def text_management():
 
 
 def processed_tensors_management(list_dirs: list[str]) -> None:
+    """
+    This function checkes wheter or not the paths for the storing of tensors
+    realated to the IEMCAP have been created. If not, it cretes them.
+
+    Args:
+        list_dirs: the name of the sub directories in the tensors folders. One\
+            for every group of data tensors
+    """
+    
     # Paths for the source and destination of the files
-    master_directory = f"{DATA_PATH}/Processed_tensors"
+    master_directory = DATA_PATH + PROCESSED_TENSORS_PATH
 
     if not os.path.exists(master_directory):
         os.mkdir(master_directory)
@@ -173,6 +191,7 @@ def processed_tensors_management(list_dirs: list[str]) -> None:
 
 
 if __name__ == "__main__":
+
     # Delete the old directories
     if os.path.exists(f"{DATA_PATH}/Emotion/Utterances"):
         shutil.rmtree(f"{DATA_PATH}/Emotion/Utterances")
