@@ -49,7 +49,7 @@ def main() -> None:
     use_small_cnn: bool = True
     dim_feed_forward = 2048
     use_word2vec = False
-    text_sequence_max_length = 30
+    text_sequence_max_length = 60
 
     # Scheduler
     weight_decay = 0.01

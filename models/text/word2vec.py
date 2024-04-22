@@ -91,11 +91,11 @@ class Word2Vec_Embedding(torch.nn.Module):
         embedded_seq = torch.stack(seq, dim=0)
 
         # Pad sequence
-        pad = self.seq_size - embedded_seq.shape[0]
+        pad = self.seq_size - embedded_seq.shape[1]
 
         if pad > 0:
             out = torch.nn.functional.pad(embedded_seq, (0, 0, 0, pad), "constant", 0)
         else:
-            out = embedded_seq[: self.seq_size, :]
+            out = embedded_seq[:, : self.seq_size, :]
 
         return out

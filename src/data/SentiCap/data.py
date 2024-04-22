@@ -65,7 +65,7 @@ class SentiCap_Dataset(Dataset):
         if use_word2vec:
             self.embedding = Word2Vec_Embedding(seq_length)
         else:
-            self.embedding = BertEmbeddings()  # type:ignore
+            self.embedding = BertEmbeddings(seq_length)  # type:ignore
         # Transformation for images
         h, w = images_size
         self.image_transformations = transforms.Compose(
