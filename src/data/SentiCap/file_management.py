@@ -15,7 +15,7 @@ def processed_tensors_management(list_dirs: list[str]) -> None:
     """
 
     # Paths for the source and destination of the files
-    master_directory = DATA_PATH + PROCESSED_TENSORS_PATH
+    master_directory = DATA_PATH + '/' + PROCESSED_TENSORS_PATH
 
     if not os.path.exists(master_directory):
         os.mkdir(master_directory)

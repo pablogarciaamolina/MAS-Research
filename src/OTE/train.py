@@ -44,7 +44,7 @@ def main() -> None:
     dropout: float = 0.4
     image_out_dim = 64
     text_out_dim = 64
-    classification_hidden_size = 128
+    classification_hidden_size = 20
     attention_heads = 4  # ¡¡ (image_out_dim + text_out_dim) % attention_heads == 0 !!
     use_small_cnn: bool = True
     dim_feed_forward = 2048

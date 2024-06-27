@@ -42,6 +42,7 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         lrn_mode: str = "full",
         lambd: float = 0.3,
         dropout: float = 0.4,
+        small_cnn: bool = False
     ) -> None:
         """
         Constructor for the model
@@ -70,7 +71,27 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         _, _, c = f_t_c
 
         # AUDIO ONLY
-        self.alexnet = AlexNet_Based_FCN(in_channels=c, C=C, lrn_mode=lrn_mode)
+        if small_cnn:
+            self.cnn = torch.nn.Sequential(
+                torch.nn.Conv2d(
+                    161, 64, kernel_size=(7, 7), padding=3, stride=2
+                ),
+                torch.nn.ReLU(),
+                torch.nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+                torch.nn.Conv2d(64, 516, 3, padding=1),
+                torch.nn.BatchNorm2d(516, dtype=torch.double),
+                torch.nn.ReLU(),
+                torch.nn.Conv2d(516, 1024, 3, stride=2, padding=1),
+                torch.nn.BatchNorm2d(1024, dtype=torch.double),
+                torch.nn.ReLU(),
+                torch.nn.AdaptiveAvgPool2d((1, 1)),
+                torch.nn.Flatten(-3),
+                torch.nn.Dropout(0.6),
+                torch.nn.Linear(1024, C),
+
+            )
+        
+        self.cnn = AlexNet_Based_FCN(in_channels=c, C=C, lrn_mode=lrn_mode)
         _, F, T, _ = self.alexnet.get_out_dims(f_t_c)  # type:ignore
         L = F * T
         self.attention = Audio_Attention(L=L, C=C, lambd=lambd)
@@ -110,8 +131,8 @@ class Audio_Text_MSA_Model(torch.nn.Module):
         """
 
         # AUDIO ONLY
-        out_alexnet = self.alexnet(audio_inputs)
-        out_audio = self.attention(out_alexnet)  # [batch, C]
+        out_cnn = self.cnn(audio_inputs)
+        out_audio = self.attention(out_cnn)  # [batch, C]
         # out_audio = self.audio_linear(out_alexnet)
 
         # TEXT ONLY

@@ -44,6 +44,7 @@ def main() -> None:
     lambd: float = 0.3
     time_dim: int = 750
     out_text_dim = 750
+    use_small_cnn = True
 
     # Scheduler
     weight_decay = 0.01
@@ -85,6 +86,7 @@ def main() -> None:
         lrn_mode=lrn_mode,
         lambd=lambd,
         dropout=dropout,
+        small_cnn=use_small_cnn
     ).to(device)
     # Set parameters to double
     parameters_to_double(model)
